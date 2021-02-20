@@ -12,7 +12,7 @@ module display_cut(){
     top_thick = 10;
     translate([-top_width/2, -top_height/2, depth]) cube([top_width, top_height, top_thick]);
 
-    step = 5;
+    step = 4;
     step_width = width-4;
     step_height = height-4;
     translate([-top_width/2, -step_height/2, step]) cube([top_width, step_height, top_thick]);
@@ -30,8 +30,7 @@ module reader_dent(){
     translate([width/2-pin_width, -height/2, -pin_depth]) cube([pin_width, height, pin_depth]);
 }
 
-module case_front()
-{
+module case_front(){
     wall = 8;
     inner_width = 110;
     width = inner_width + 2*wall;
