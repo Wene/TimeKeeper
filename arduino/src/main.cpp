@@ -9,7 +9,7 @@ Rfid *rfid;
 
 void setup()
 {
-  Serial.begin(115200);
+  Serial.begin(9600);
   Serial.println(F("Booting TimeKeeper IO module..."));
 
   Serial.println(F("Searching for I2C display..."));
