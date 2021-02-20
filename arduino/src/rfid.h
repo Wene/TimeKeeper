@@ -12,7 +12,7 @@ public:
   ~Rfid();
   bool new_card_id(String &text);
 private:
-  MFRC522 *rfid;
+  MFRC522 rfid;
 };
 
 #endif // RFID_H

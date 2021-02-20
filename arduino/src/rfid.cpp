@@ -1,20 +1,20 @@
 #include "rfid.h"
+#include <SPI.h>
 
-Rfid::Rfid()
+Rfid::Rfid() : rfid(10, A0)
 {
-  rfid = new MFRC522(A0, 10);
-  rfid->PCD_Init();
+  SPI.begin();
+  rfid.PCD_Init();
 }
 
-Rfid::Rfid(byte select_pin, byte reset_pin)
+Rfid::Rfid(byte select_pin, byte reset_pin) : rfid(select_pin, reset_pin)
 {
-  rfid = new MFRC522(select_pin, reset_pin);
-  rfid->PCD_Init();
+  SPI.begin();
+  rfid.PCD_Init();
 }
 
 Rfid::~Rfid()
 {
-  delete rfid;
 }
 
 
@@ -22,12 +22,13 @@ bool Rfid::new_card_id(String &text)
 {
   bool card_present = false;
 
-  if(rfid->PICC_IsNewCardPresent() && rfid->PICC_ReadCardSerial())
+  if(rfid.PICC_IsNewCardPresent() && rfid.PICC_ReadCardSerial())
   {
     card_present = true;
 
-    byte *data = rfid->uid.uidByte;
-    byte size = rfid->uid.size;
+    byte *data = rfid.uid.uidByte;
+    byte size = rfid.uid.size;
+    rfid.PICC_HaltA();
 
     text = "0x";
     for(byte i = 0; i < size; i++)
