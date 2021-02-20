@@ -31,5 +31,11 @@ DEFINES += "__AVR_ATmega328P__"
 
 OTHER_FILES += platformio.ini
 
-SOURCES += src/main.cpp.autosave
+SOURCES += src/main.cpp \
+    src/display.cpp \
+    src/rfid.cpp
 SOURCES += src/main.cpp
+
+HEADERS += \
+    src/display.h \
+    src/rfid.h
