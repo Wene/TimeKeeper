@@ -1,16 +1,15 @@
 #include <Arduino.h>
 #include <LiquidCrystal_PCF8574.h>
-#include <MFRC522.h>
 #include <Wire.h>
-
-#define NO_CHAR byte(0)
-#define AUML byte(1)
-#define OUML byte(2)
-#define UUML byte(3)
+#include <MFRC522.h>
 
 #define VERSION F("0.1.0")
 
 LiquidCrystal_PCF8574 *lcd;
+
+#define RFID_RESET_PIN A0
+#define RFID_SELECT_PIN 10
+MFRC522 rfid(RFID_SELECT_PIN, RFID_RESET_PIN);
 
 uint8_t find_i2c_display()
 {
@@ -33,7 +32,6 @@ uint8_t find_i2c_display()
         lcd->setBacklight(255);
         lcd->clear();
         lcd->home();
-        lcd->print(F("Booting..."));
         break;
       }
     }
@@ -43,6 +41,10 @@ uint8_t find_i2c_display()
   return found_addr;
 }
 
+#define NO_CHAR byte(0)
+#define AUML byte(1)
+#define OUML byte(2)
+#define UUML byte(3)
 void define_umlaut_character()
 {
   byte no_char[8] =
@@ -98,36 +100,111 @@ void define_umlaut_character()
   lcd->createChar(UUML, uuml);
 }
 
+#define HOUR_0 byte(0)
+#define HOUR_1 byte(1)
+#define HOUR_2 byte(2)
+#define HOUR_3 byte(3)
+void define_hourglass_character()
+{
+  byte hour_0[8] =
+  {
+    B11111,
+    B11111,
+    B11111,
+    B01110,
+    B01010,
+    B10001,
+    B10001,
+    B11111,
+  };
+  lcd->createChar(HOUR_0, hour_0);
+
+  byte hour_1[8] =
+  {
+    B11111,
+    B10001,
+    B11111,
+    B01110,
+    B01010,
+    B10001,
+    B11111,
+    B11111,
+  };
+  lcd->createChar(HOUR_1, hour_1);
+
+  byte hour_2[8] =
+  {
+    B11111,
+    B10001,
+    B10001,
+    B01110,
+    B01010,
+    B11111,
+    B11111,
+    B11111,
+  };
+  lcd->createChar(HOUR_2, hour_2);
+
+  byte hour_3[8] =
+  {
+    B11111,
+    B10001,
+    B10001,
+    B01010,
+    B01110,
+    B11111,
+    B11111,
+    B11111,
+  };
+  lcd->createChar(HOUR_3, hour_3);
+}
+
+void wait_for_host()
+{
+  define_hourglass_character();
+
+  while(true)
+  {
+    lcd->setCursor(15, 0);
+    lcd->write(HOUR_0);
+    delay(400);
+    lcd->setCursor(15, 0);
+    lcd->write(HOUR_1);
+    delay(400);
+    lcd->setCursor(15, 0);
+    lcd->write(HOUR_2);
+    delay(400);
+    lcd->setCursor(15, 0);
+    lcd->write(HOUR_3);
+    delay(400);
+  }
+}
+
 void setup()
 {
   Serial.begin(115200);
-  Serial.println(F("Booting..."));
+  Serial.println(F("Booting TimeKeeper IO module..."));
 
   Serial.println(F("Searching for I2C display..."));
   uint8_t addr = find_i2c_display();
-  define_umlaut_character();
+  lcd->setCursor(0, 0);
+  lcd->print(F("Booting..."));
   Serial.print(F("Display found at address 0x"));
   Serial.println(addr, HEX);
 
-  Serial.print(F("Ready ("));
+  rfid.PCD_Init();
+  Serial.println(F("RFID module initialized"));
+
+  lcd->setCursor(0, 1);
+  Serial.print(F("TimeKeeper IO module ready ("));
   Serial.print(VERSION);
   Serial.println(")");
+  lcd->print(F("Waiting for host"));
+  wait_for_host();
+
+  define_umlaut_character();
 }
 
 void loop()
 {
-  delay(500);
-  lcd->clear();
-  lcd->home();
-  lcd->print(F("loop"));
-  lcd->setCursor(0, 1);
-  lcd->print("a");
-  lcd->write(AUML);
-  lcd->print("o");
-  lcd->write(OUML);
-  lcd->print("u");
-  lcd->write(UUML);
-  lcd->write(NO_CHAR);
-  lcd->write(NO_CHAR);
-  lcd->write(NO_CHAR);
 }
