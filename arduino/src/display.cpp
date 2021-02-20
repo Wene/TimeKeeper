@@ -51,8 +51,10 @@ uint8_t Display::init()
 void Display::print(uint8_t line, String &text)
 {
   lcd->setCursor(0, line);
+  lcd->print(F("                "));
+  lcd->setCursor(0, line);
   // TODO: replace umlauts in text
-  lcd->print(text);
+  lcd->print(text.substring(0, 16));
 }
 
 void Display::hourglass_step()
