@@ -8,14 +8,15 @@
 #define OUML byte(2)
 #define UUML byte(3)
 
+#define VERSION F("0.1.0")
+
 LiquidCrystal_PCF8574 *lcd;
 
-void find_i2c_display()
+uint8_t find_i2c_display()
 {
-  bool searching = true;
-  while(searching)  // Endless loop until a display was found - makes sure lcd is not NULL.
+  uint8_t found_addr = 0;
+  while(0 == found_addr)  // Endless loop until a display was found - makes sure lcd is not NULL.
   {
-    Serial.println(F("Searching for display..."));
     Wire.begin();
     for(uint8_t addr = 0; addr <= 127; addr++)
     {
@@ -26,7 +27,7 @@ void find_i2c_display()
       // Enable display when address was found
       if(error == 0)
       {
-        searching = false;
+        found_addr = addr;
         lcd = new LiquidCrystal_PCF8574(addr);
         lcd->begin(16, 2);
         lcd->setBacklight(255);
@@ -38,6 +39,8 @@ void find_i2c_display()
     }
     Wire.end();
   }
+
+  return found_addr;
 }
 
 void define_umlaut_character()
@@ -101,12 +104,15 @@ void setup()
   Serial.println(F("Booting..."));
 
   Serial.println(F("Searching for I2C display..."));
-  find_i2c_display();
+  uint8_t addr = find_i2c_display();
   define_umlaut_character();
-  Serial.println(F("Display found and ativated."));
+  Serial.print(F("Display found at address 0x"));
+  Serial.println(addr, HEX);
 
+  Serial.print(F("Ready ("));
+  Serial.print(VERSION);
+  Serial.println(")");
 }
-
 
 void loop()
 {
