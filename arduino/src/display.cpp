@@ -75,9 +75,7 @@ void Display::print(uint8_t line, String &text)
       switch(c)
       {
       default:
-        lcd->print("(");
-        lcd->print((int)c);
-        lcd->print(")");
+        lcd->write(NO_CHAR);
         break;
       case (char)164:
         lcd->write(AUML);
@@ -92,9 +90,7 @@ void Display::print(uint8_t line, String &text)
     }
     else
     {
-      lcd->print("[");
-      lcd->print((int)c);
-      lcd->print("]");
+      lcd->write(NO_CHAR);
     }
     out_pos++;
   }
