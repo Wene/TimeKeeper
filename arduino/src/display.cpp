@@ -48,13 +48,56 @@ uint8_t Display::init()
   return found_addr;
 }
 
+#define NO_CHAR byte(4)
+#define AUML byte(5)
+#define OUML byte(6)
+#define UUML byte(7)
+
 void Display::print(uint8_t line, String &text)
 {
   lcd->setCursor(0, line);
   lcd->print(F("                "));
   lcd->setCursor(0, line);
-  // TODO: replace umlauts in text
-  lcd->print(text.substring(0, 16));
+
+  unsigned int out_pos = 0;
+  unsigned int str_pos = 0;
+  while(str_pos < text.length() && out_pos < 16)
+  {
+    char c = text.charAt(str_pos++);
+    if((c >= 32 && c <= 91) || (c >= 93 && c <= 95) || (c >= 97 && c <= 125))
+    {
+      lcd->print(c);
+    }
+    else if((char)195 == c)
+    {
+      // utf-8 umlauts
+      c = text.charAt(str_pos++);
+      switch(c)
+      {
+      default:
+        lcd->print("(");
+        lcd->print((int)c);
+        lcd->print(")");
+        break;
+      case (char)164:
+        lcd->write(AUML);
+        break;
+      case (char)182:
+        lcd->write(OUML);
+        break;
+      case (char)188:
+        lcd->write(UUML);
+        break;
+      }
+    }
+    else
+    {
+      lcd->print("[");
+      lcd->print((int)c);
+      lcd->print("]");
+    }
+    out_pos++;
+  }
 }
 
 void Display::hourglass_step()
@@ -68,10 +111,6 @@ void Display::hourglass_step()
   }
 }
 
-#define NO_CHAR byte(4)
-#define AUML byte(5)
-#define OUML byte(6)
-#define UUML byte(7)
 void Display::define_umlaut_character()
 {
   byte no_char[8] =
