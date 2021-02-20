@@ -3,19 +3,17 @@
 #include <MFRC522.h>
 #include <Wire.h>
 
-#define AUML byte(0)
-#define OUML byte(1)
-#define UUML byte(2)
+#define NO_CHAR byte(0)
+#define AUML byte(1)
+#define OUML byte(2)
+#define UUML byte(3)
 
 LiquidCrystal_PCF8574 *lcd;
 
-void setup()
+void find_i2c_display()
 {
-  Serial.begin(115200);
-  Serial.println(F("Booting..."));
-
   bool searching = true;
-  while(searching)
+  while(searching)  // Endless loop until a display was found - makes sure lcd is not NULL.
   {
     Serial.println(F("Searching for display..."));
     Wire.begin();
@@ -40,7 +38,22 @@ void setup()
     }
     Wire.end();
   }
-  Serial.println(F("Display found and ativated."));
+}
+
+void define_umlaut_character()
+{
+  byte no_char[8] =
+  {
+    B11111,
+    B10001,
+    B10001,
+    B10001,
+    B10001,
+    B10001,
+    B10001,
+    B11111,
+  };
+  lcd->createChar(NO_CHAR, no_char);
 
   byte auml[8] =
   {
@@ -80,6 +93,17 @@ void setup()
     B00000,
   };
   lcd->createChar(UUML, uuml);
+}
+
+void setup()
+{
+  Serial.begin(115200);
+  Serial.println(F("Booting..."));
+
+  Serial.println(F("Searching for I2C display..."));
+  find_i2c_display();
+  define_umlaut_character();
+  Serial.println(F("Display found and ativated."));
 
 }
 
@@ -97,4 +121,7 @@ void loop()
   lcd->write(OUML);
   lcd->print("u");
   lcd->write(UUML);
+  lcd->write(NO_CHAR);
+  lcd->write(NO_CHAR);
+  lcd->write(NO_CHAR);
 }
