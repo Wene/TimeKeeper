@@ -51,6 +51,7 @@ uint8_t Display::init()
 void Display::print(uint8_t line, String &text)
 {
   lcd->setCursor(0, line);
+  // TODO: replace umlauts in text
   lcd->print(text);
 }
 
