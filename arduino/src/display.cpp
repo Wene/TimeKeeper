@@ -96,6 +96,11 @@ void Display::print(uint8_t line, String &text)
   }
 }
 
+void Display::clear()
+{
+  lcd->clear();
+}
+
 void Display::hourglass_step()
 {
   lcd->setCursor(15, 0);

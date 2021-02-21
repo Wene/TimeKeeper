@@ -33,9 +33,11 @@ OTHER_FILES += platformio.ini
 
 SOURCES += src/main.cpp \
     src/display.cpp \
+    src/host.cpp \
     src/rfid.cpp
 SOURCES += src/main.cpp
 
 HEADERS += \
     src/display.h \
+    src/host.h \
     src/rfid.h

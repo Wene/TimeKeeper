@@ -12,6 +12,8 @@ public:
   uint8_t init();
   void hourglass_step();
   void print(uint8_t line, String &text);
+  void clear();
+
 private:
   LiquidCrystal_PCF8574 *lcd;
   void find_i2c_display();

@@ -1,10 +1,12 @@
 #include <Arduino.h>
 #include "display.h"
 #include "rfid.h"
+#include "host.h"
 
 #define VERSION F("0.1.0")
 
 Display display;
+Host host(display);
 Rfid *rfid;
 
 void setup()
@@ -30,25 +32,6 @@ void setup()
   display.print(1, text);
 }
 
-void read_serial()
-{
-  static String input;
-  while(Serial.available())
-  {
-    char c = Serial.read();
-    if(13 == c || 10 == c)
-    {
-      display.print(1, input);
-      input = "";
-    }
-    else
-    {
-      input += c;
-    }
-  }
-}
-
-unsigned long last_time;
 String card_id;
 
 void loop()
@@ -61,11 +44,5 @@ void loop()
     Serial.println(card_id);
   }
 
-  read_serial();
-
-  if(now > last_time + 400)
-  {
-    last_time = now;
-    display.hourglass_step();
-  }
+  host.communicate(now);
 }
