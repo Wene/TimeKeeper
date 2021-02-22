@@ -25,6 +25,7 @@ void Host::read_input()
       if(input.length() > 0)
       {
         check_heartbeat();
+        check_print();
         input = "";
       }
     }
@@ -70,6 +71,21 @@ void Host::check_heartbeat()
       heartbeat_requested = false;
       host_alive = true;
       display.clear();
+    }
+  }
+}
+
+void Host::check_print()
+{
+  if(host_alive)
+  {
+    String begin = F("print "); // print 1 Hello World
+    if(input.startsWith(begin))
+    {
+      String line_str = input.substring(begin.length(), begin.length() + 2);
+      uint8_t line = line_str.toInt();
+      String print_str = input.substring(begin.length() + 2);
+      display.print(line, print_str);
     }
   }
 }

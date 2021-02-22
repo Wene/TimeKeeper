@@ -15,6 +15,7 @@ private:
   void read_input();
   void request_heartbeat(unsigned long now);
   void check_heartbeat();
+  void check_print();
   void indicate_host_offline(unsigned long now);
 
   unsigned long last_heartbeat;
