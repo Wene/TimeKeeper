@@ -63,10 +63,10 @@ void Host::request_heartbeat(unsigned long now)
 
 void Host::check_heartbeat()
 {
-  String comp = F("heartbeat response");
-  if(comp == input)
+  if(heartbeat_requested)
   {
-    if(heartbeat_requested)
+    String comp = F("heartbeat response");
+    if(comp == input)
     {
       heartbeat_requested = false;
       host_alive = true;
