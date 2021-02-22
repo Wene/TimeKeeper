@@ -30,7 +30,10 @@ void Host::read_input()
     }
     else
     {
-      input += c;
+      if(input.length() < 80)
+      {
+        input += c;
+      }
     }
   }
 }
