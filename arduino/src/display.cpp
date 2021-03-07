@@ -56,8 +56,6 @@ uint8_t Display::init()
 void Display::print(uint8_t line, String &text)
 {
   lcd->setCursor(0, line);
-  lcd->print(F("                "));
-  lcd->setCursor(0, line);
 
   unsigned int out_pos = 0;
   unsigned int str_pos = 0;
@@ -92,6 +90,11 @@ void Display::print(uint8_t line, String &text)
     {
       lcd->write(NO_CHAR);
     }
+    out_pos++;
+  }
+  while(out_pos < 16)
+  {
+    lcd->print(" ");
     out_pos++;
   }
 }
