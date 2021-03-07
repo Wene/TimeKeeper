@@ -10,7 +10,7 @@ class TimeKeeperService(QObject):
         super().__init__(parent)
 
         self.serial = SerialInterface(self)
-        self.serial.new_line.connect(self.print_line)
+        self.serial.new_line.connect(self.process_line)
 
         # timer to give focus to the Python interpreter for processing signals
         self.python_signal_timer = QTimer()
@@ -49,8 +49,10 @@ class TimeKeeperService(QObject):
         self.serial.close()
 
     @pyqtSlot(str)
-    def print_line(self, line):
-        print(f'got new line: "{line}"')
+    def process_line(self, line):
+        if 'heartbeat request' == line:
+            answer = 'heartbeat response'
+            self.serial.send(answer)
 
 
 class SerialInterface(QObject):
@@ -96,6 +98,13 @@ class SerialInterface(QObject):
             send_text = self.buffer[:pos].rstrip()
             self.buffer = self.buffer[pos:].lstrip()
             self.new_line.emit(send_text)
+
+    @pyqtSlot(str)
+    def send(self, text: str):
+        if self.is_open:
+            text += '\n'
+            data = text.encode('utf-8')
+            self.port.write(data)
 
 
 if '__main__' == __name__:
