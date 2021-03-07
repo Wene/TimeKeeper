@@ -10,6 +10,7 @@ class TimeKeeperService(QObject):
         super().__init__(parent)
 
         self.serial = SerialInterface(self)
+        self.serial.new_line.connect(self.print_line)
 
         # timer to give focus to the Python interpreter for processing signals
         self.python_signal_timer = QTimer()
@@ -47,12 +48,22 @@ class TimeKeeperService(QObject):
     def stop(self):
         self.serial.close()
 
+    @pyqtSlot(str)
+    def print_line(self, line):
+        print(f'got new line: "{line}"')
+
 
 class SerialInterface(QObject):
+    new_line = pyqtSignal(str)
+
     def __init__(self, parent=None):
         super().__init__(parent)
+
         self.port = QSerialPort()
+
         self.is_open = False
+
+        self.buffer = str()
 
     def open(self, name='FT232R USB UART'):
         if self.is_open:
@@ -65,7 +76,7 @@ class SerialInterface(QObject):
                 self.port.setBaudRate(9600)
                 self.port.open(QSerialPort.ReadWrite)
                 self.is_open = True
-                self.port.readyRead.connect(self.read_and_print)
+                self.port.readyRead.connect(self.read_data)
                 break
         if self.is_open:
             return True
@@ -77,9 +88,14 @@ class SerialInterface(QObject):
             self.port.close()
             self.is_open = False
 
-    def read_and_print(self):
-        byte_array = self.port.readAll()
-        print(byte_array.data().decode())
+    def read_data(self):
+        new_bytes = self.port.readAll()
+        self.buffer += new_bytes.data().decode('utf-8')
+        while '\n' in self.buffer:
+            pos = self.buffer.find('\n')
+            send_text = self.buffer[:pos].rstrip()
+            self.buffer = self.buffer[pos:].lstrip()
+            self.new_line.emit(send_text)
 
 
 if '__main__' == __name__:
