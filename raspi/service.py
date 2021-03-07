@@ -6,6 +6,8 @@ import signal
 
 
 class TimeKeeperService(QObject):
+    update_time = pyqtSignal(QDateTime)
+
     def __init__(self, parent=None):
         super().__init__(parent)
 
@@ -24,10 +26,34 @@ class TimeKeeperService(QObject):
         self.reopen_timer.setInterval(3000)
         self.reopen_timer.timeout.connect(self.open_serial)
 
+        self.last_time_str = ''
+        self.now_update_timer = QTimer()
+        self.now_update_timer.setInterval(50)
+        self.now_update_timer.timeout.connect(self.update_now)
+        self.now_update_timer.start()
+        self.update_time.connect(self.update_clock)
+
     def signal_handler(self, sig_num, stack_frame):
         self.stop()
         print('signal handled')
         QCoreApplication.quit()
+
+    @pyqtSlot()
+    def update_now(self):
+        new_date_time = QDateTime.currentDateTime()
+        new_time_str = new_date_time.toString('yyyy-MM-dd hh:mm:ss')
+        if self.last_time_str != new_time_str:
+            self.last_time_str = new_time_str
+            self.update_time.emit(new_date_time)
+
+    @pyqtSlot(QDateTime)
+    def update_clock(self, date_time: QDateTime):
+        time_str = date_time.toString('hh:mm:ss')
+        date_str = date_time.toString('dd.MM.yyyy')
+        time_cmd = f'print 0 {time_str}'
+        date_cmd = f'print 1 {date_str}'
+        self.serial.send(time_cmd)
+        self.serial.send(date_cmd)
 
     @pyqtSlot()
     def start(self):
