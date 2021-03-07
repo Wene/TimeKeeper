@@ -27,16 +27,25 @@ class TimeKeeperService(QObject):
         self.reopen_timer.timeout.connect(self.open_serial)
 
         self.last_time_str = ''
-        self.now_update_timer = QTimer()
-        self.now_update_timer.setInterval(50)
-        self.now_update_timer.timeout.connect(self.update_now)
-        self.now_update_timer.start()
+        self.time_update_timer = QTimer()
+        self.time_update_timer.setInterval(50)
+        self.time_update_timer.timeout.connect(self.update_now)
+        self.time_update_timer.start()
         self.update_time.connect(self.update_clock)
+
+        self.resume_timer = QTimer()
+        self.resume_timer.setInterval(3500)
+        self.resume_timer.setSingleShot(True)
+        self.resume_timer.timeout.connect(self.resume)
 
     def signal_handler(self, sig_num, stack_frame):
         self.stop()
         print('signal handled')
         QCoreApplication.quit()
+
+    @pyqtSlot()
+    def resume(self):
+        self.time_update_timer.start()
 
     @pyqtSlot()
     def update_now(self):
@@ -75,10 +84,20 @@ class TimeKeeperService(QObject):
         self.serial.close()
 
     @pyqtSlot(str)
-    def process_line(self, line):
+    def process_line(self, line: str):
+        id_identifier = 'Card ID: '
         if 'heartbeat request' == line:
             answer = 'heartbeat response'
             self.serial.send(answer)
+        elif line.startswith(id_identifier):
+            id_str = line[len(id_identifier):]
+            id_int = int(id_str, 0)
+            self.time_update_timer.stop()
+            self.resume_timer.start()
+            line_0_cmd = f'print 0 {id_str}'
+            line_1_cmd = f'print 1 {str(id_int)}'
+            self.serial.send(line_0_cmd)
+            self.serial.send(line_1_cmd)
 
 
 class SerialInterface(QObject):
