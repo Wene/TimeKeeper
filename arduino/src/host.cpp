@@ -69,8 +69,11 @@ void Host::check_heartbeat()
     if(comp == input)
     {
       heartbeat_requested = false;
-      host_alive = true;
-      display.clear();
+      if(!host_alive)
+      {
+        host_alive = true;
+        display.clear();
+      }
     }
   }
 }
