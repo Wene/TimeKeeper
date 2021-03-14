@@ -5,6 +5,17 @@ from PyQt5.QtSerialPort import *
 import signal
 
 
+class TimeLogger(QObject):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.filename = 'logfile.tsv'
+
+    def log_badge(self, timestamp, badge):
+        with open(self.filename, 'a') as f:
+            line = f'{timestamp}\t{badge}'
+            print(line, file=f)
+
+
 class TimeKeeperService(QObject):
     update_time = pyqtSignal(QDateTime)
 
@@ -37,6 +48,8 @@ class TimeKeeperService(QObject):
         self.resume_timer.setInterval(3500)
         self.resume_timer.setSingleShot(True)
         self.resume_timer.timeout.connect(self.resume)
+
+        self.logger = TimeLogger(self)
 
     def signal_handler(self, sig_num, stack_frame):
         self.reopen_timer.stop()
@@ -97,6 +110,7 @@ class TimeKeeperService(QObject):
             self.resume_timer.start()
             self.serial.send(f'print 0 {id_str}')
             self.serial.send(f'print 1 {str(id_int)}')
+            self.logger.log_badge(self.last_time_str, id_str)
 
 
 class SerialInterface(QObject):
