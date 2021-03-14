@@ -86,7 +86,7 @@ class TimeKeeperService(QObject):
 
     @pyqtSlot()
     def open_serial(self):
-        success = self.serial.open()
+        success = self.serial.open(port='ttyS0')
         if success:
             self.reopen_timer.stop()
             print('serial opened successfully')
@@ -118,20 +118,23 @@ class SerialInterface(QObject):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-
         self.port = QSerialPort()
-
         self.is_open = False
-
         self.buffer = str()
 
-    def open(self, name='FT232R USB UART'):
+    def open(self, name='FT232R USB UART', port=None):
         if self.is_open:
             self.port.close()
             self.is_open = False
         all_ports = QSerialPortInfo.availablePorts()
         for info in all_ports:
-            if info.description() == name:
+            use_this = False
+            if port:
+                if info.portName() == port:
+                    use_this = True
+            elif info.description() == name:
+                use_this = True
+            if use_this:
                 self.port.setPort(info)
                 self.port.setBaudRate(9600)
                 self.port.open(QSerialPort.ReadWrite)
