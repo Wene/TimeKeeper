@@ -39,8 +39,10 @@ class TimeKeeperService(QObject):
         self.resume_timer.timeout.connect(self.resume)
 
     def signal_handler(self, sig_num, stack_frame):
+        self.reopen_timer.stop()
+        self.time_update_timer.stop()
+        self.resume_timer.stop()
         self.stop()
-        print('signal handled')
         QCoreApplication.quit()
 
     @pyqtSlot()
@@ -87,17 +89,14 @@ class TimeKeeperService(QObject):
     def process_line(self, line: str):
         id_identifier = 'Card ID: '
         if 'heartbeat request' == line:
-            answer = 'heartbeat response'
-            self.serial.send(answer)
+            self.serial.send('heartbeat response')
         elif line.startswith(id_identifier):
             id_str = line[len(id_identifier):]
             id_int = int(id_str, 0)
             self.time_update_timer.stop()
             self.resume_timer.start()
-            line_0_cmd = f'print 0 {id_str}'
-            line_1_cmd = f'print 1 {str(id_int)}'
-            self.serial.send(line_0_cmd)
-            self.serial.send(line_1_cmd)
+            self.serial.send(f'print 0 {id_str}')
+            self.serial.send(f'print 1 {str(id_int)}')
 
 
 class SerialInterface(QObject):
