@@ -1,0 +1,10 @@
+[Unit]
+Description=TimeKeeper service
+
+[Service]
+ExecStart=/home/pi/TimeKeeper/service.py
+WorkingDirectory=/home/pi/TimeKeeper
+User=pi
+
+[Install]
+WantedBy=multi-user.target
