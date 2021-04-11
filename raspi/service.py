@@ -6,35 +6,36 @@ import signal
 import sqlite3
 
 
-class DB:
-    def __init__(self, db_file):
+class DB(QObject):
+    def __init__(self, parent, db_file: str):
+        super().__init__(parent)
         self.conn = sqlite3.connect(db_file)
-        self.cur = self.conn.cursor()
         self._create_db()
 
     def __del__(self):
-        self.cur.close()
         self.conn.close()
 
     def _create_db(self):
-        self.cur.execute('CREATE TABLE IF NOT EXISTS "owner" ("id" INTEGER PRIMARY KEY, "name" TEXT NOT NULL);')
-        self.cur.execute('CREATE TABLE IF NOT EXISTS "source" ("id" INTEGER PRIMARY KEY, "name" TEXT NOT NULL);')
-        self.cur.execute('CREATE TABLE IF NOT EXISTS "badge" ("id" INTEGER PRIMARY KEY, "badge_hex" TEXT NOT NULL, '
-                         '"owner_id" INTEGER NOT NULL, "valid_since" INTEGER, "valid_until" INTEGER);')
-        self.cur.execute('CREATE TABLE IF NOT EXISTS "event" ("id" INTEGER PRIMARY KEY, "badge_hex" TEXT NOT NULL, '
-                         '"time" INTEGER NOT NULL, "source_id" INTEGER NOT NULL);')
+        cur = self.conn.cursor()
+        cur.execute('CREATE TABLE IF NOT EXISTS "owner" ("id" INTEGER PRIMARY KEY, "name" TEXT NOT NULL);')
+        cur.execute('CREATE TABLE IF NOT EXISTS "source" ("id" INTEGER PRIMARY KEY, "name" TEXT NOT NULL);')
+        cur.execute('CREATE TABLE IF NOT EXISTS "badge" ("id" INTEGER PRIMARY KEY, "badge_hex" TEXT NOT NULL, '
+                    '"owner_id" INTEGER NOT NULL, "valid_since" INTEGER, "valid_until" INTEGER);')
+        cur.execute('CREATE TABLE IF NOT EXISTS "event" ("id" INTEGER PRIMARY KEY, "badge_hex" TEXT NOT NULL, '
+                    '"time" INTEGER NOT NULL, "source_id" INTEGER NOT NULL);')
+        cur.close()
         self.conn.commit()
 
-
-class TimeLogger(QObject):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.filename = 'logfile.tsv'
-
-    def log_badge(self, timestamp, badge):
-        with open(self.filename, 'a') as f:
-            line = f'{timestamp}\t{badge}'
-            print(line, file=f)
+    def log_event(self, timestamp: int, badge: str, source: str):
+        cur = self.conn.cursor()
+        cur.execute('SELECT "id" FROM "source" WHERE "name" = ?', (source,))
+        if 0 == cur.rowcount:
+            cur.execute('INSERT INTO source (name) VALUES (?)', (source,))
+            cur.execute('SELECT last_insert_rowid()')
+        source_id = cur.fetchone()[0]
+        cur.execute('INSERT INTO event (badge_hex, time, source_id) VALUES (?, ?, ?)', (badge, timestamp, source_id))
+        cur.close()
+        self.conn.commit()
 
 
 class TimeKeeperService(QObject):
@@ -75,7 +76,7 @@ class TimeKeeperService(QObject):
         self.resume_timer.setSingleShot(True)
         self.resume_timer.timeout.connect(self.resume)
 
-        self.logger = TimeLogger(self)
+        self.db = DB(self, 'timekeeper.db')
 
     def signal_handler(self, sig_num, stack_frame):
         self.reopen_timer.stop()
@@ -137,7 +138,7 @@ class TimeKeeperService(QObject):
             self.resume_timer.start()
             self.serial.send(f'print 0 {id_str}')
             self.serial.send(f'print 1 {str(id_int)}')
-            self.logger.log_badge(self.last_time_stamp, id_str)
+            self.db.log_event(self.last_time_stamp, id_str, 'main')
 
 
 class SerialInterface(QObject):
