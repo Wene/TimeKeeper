@@ -42,7 +42,7 @@ class TimeKeeperService(QObject):
         self.reopen_timer.setInterval(3000)
         self.reopen_timer.timeout.connect(self.open_serial)
 
-        self.last_time_str = ''
+        self.last_time_stamp = QDateTime.currentSecsSinceEpoch()
         self.time_update_timer = QTimer()
         self.time_update_timer.setInterval(50)
         self.time_update_timer.timeout.connect(self.update_now)
@@ -71,9 +71,9 @@ class TimeKeeperService(QObject):
     @pyqtSlot()
     def update_now(self):
         new_date_time = QDateTime.currentDateTime()
-        new_time_str = new_date_time.toString('yyyy-MM-dd hh:mm:ss')
-        if self.last_time_str != new_time_str:
-            self.last_time_str = new_time_str
+        new_time_stamp = new_date_time.toSecsSinceEpoch()
+        if self.last_time_stamp != new_time_stamp:
+            self.last_time_stamp = new_time_stamp
             self.update_time.emit(new_date_time)
 
     @pyqtSlot(QDateTime)
@@ -116,7 +116,7 @@ class TimeKeeperService(QObject):
             self.resume_timer.start()
             self.serial.send(f'print 0 {id_str}')
             self.serial.send(f'print 1 {str(id_int)}')
-            self.logger.log_badge(self.last_time_str, id_str)
+            self.logger.log_badge(self.last_time_stamp, id_str)
 
 
 class SerialInterface(QObject):
