@@ -3,6 +3,27 @@
 from PyQt5.QtCore import *
 from PyQt5.QtSerialPort import *
 import signal
+import sqlite3
+
+
+class DB:
+    def __init__(self, db_file):
+        self.conn = sqlite3.connect(db_file)
+        self.cur = self.conn.cursor()
+        self._create_db()
+
+    def __del__(self):
+        self.cur.close()
+        self.conn.close()
+
+    def _create_db(self):
+        self.cur.execute('CREATE TABLE IF NOT EXISTS "owner" ("id" INTEGER PRIMARY KEY, "name" TEXT NOT NULL);')
+        self.cur.execute('CREATE TABLE IF NOT EXISTS "source" ("id" INTEGER PRIMARY KEY, "name" TEXT NOT NULL);')
+        self.cur.execute('CREATE TABLE IF NOT EXISTS "badge" ("id" INTEGER PRIMARY KEY, "badge_hex" TEXT NOT NULL, '
+                         '"owner_id" INTEGER NOT NULL, "valid_since" INTEGER, "valid_until" INTEGER);')
+        self.cur.execute('CREATE TABLE IF NOT EXISTS "event" ("id" INTEGER PRIMARY KEY, "badge_hex" TEXT NOT NULL, '
+                         '"time" INTEGER NOT NULL, "source_id" INTEGER NOT NULL);')
+        self.conn.commit()
 
 
 class TimeLogger(QObject):
@@ -61,7 +82,7 @@ class TimeKeeperService(QObject):
         self.time_update_timer.stop()
         self.resume_timer.stop()
         self.stop()
-
+        print('service stopped')
         QCoreApplication.quit()
 
     @pyqtSlot()
