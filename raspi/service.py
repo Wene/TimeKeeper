@@ -29,10 +29,12 @@ class DB(QObject):
     def log_event(self, timestamp: int, badge: str, source: str):
         cur = self.conn.cursor()
         cur.execute('SELECT "id" FROM "source" WHERE "name" = ?', (source,))
-        if 0 == cur.rowcount:
+        result = cur.fetchone()
+        if result is None:
             cur.execute('INSERT INTO source (name) VALUES (?)', (source,))
             cur.execute('SELECT last_insert_rowid()')
-        source_id = cur.fetchone()[0]
+            result = cur.fetchone()
+        source_id = result[0]
         cur.execute('INSERT INTO event (badge_hex, time, source_id) VALUES (?, ?, ?)', (badge, timestamp, source_id))
         cur.close()
         self.conn.commit()
