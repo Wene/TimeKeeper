@@ -48,8 +48,10 @@ class TimeKeeperService(QObject):
         self.settings = QSettings(self)
         self.port_name = self.settings.value('port_name', 'FT232R USB UART')
         self.port = self.settings.value('port', '')
+        self.source_name = self.settings.value('source', 'main')
         self.settings.setValue('port_name', self.port_name)
         self.settings.setValue('port', self.port)
+        self.settings.setValue('source', self.source_name)
 
         self.serial = SerialInterface(self)
         self.serial.new_line.connect(self.process_line)
@@ -140,7 +142,7 @@ class TimeKeeperService(QObject):
             self.resume_timer.start()
             self.serial.send(f'print 0 {id_str}')
             self.serial.send(f'print 1 {str(id_int)}')
-            self.db.log_event(self.last_time_stamp, id_str, 'main')
+            self.db.log_event(self.last_time_stamp, id_str, self.source_name)
 
 
 class SerialInterface(QObject):
