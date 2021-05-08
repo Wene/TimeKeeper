@@ -65,3 +65,20 @@ class DB(QObject):
         owner_id = self.get_owner_id_by_nme(owner)
         new_id = self.add_badge_by_owner_id(badge_hex, owner_id, valid_since)
         return new_id
+
+    def get_events_between_timestamps(self, time_from: int, time_to: int):
+        cur = self.conn.cursor()
+        cur.execute('SELECT owner.name, event.time, badge.badge_hex FROM owner, event, badge '
+                    'WHERE owner.id = badge.owner_id AND event.badge_hex = badge.badge_hex'
+                    'AND event.time >= ? AND event.time <= ?;', (time_from, time_to))
+        result = cur.fetchall()
+        table = []
+        for record in result:
+            name = result[0]
+            timestamp = result[1]
+            badge = result[2]
+            time_obj = QDateTime.fromSecsSinceEpoch(timestamp)
+            date_str = time_obj.toString('dd.MM.yyyy')
+            time_str = time_obj.toString('hh:mm:ss')
+            table.append((date_str, time_str, name, badge))
+        return table
