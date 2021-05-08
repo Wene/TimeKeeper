@@ -69,14 +69,14 @@ class DB(QObject):
     def get_events_between_timestamps(self, time_from: int, time_to: int):
         cur = self.conn.cursor()
         cur.execute('SELECT owner.name, event.time, badge.badge_hex FROM owner, event, badge '
-                    'WHERE owner.id = badge.owner_id AND event.badge_hex = badge.badge_hex'
+                    'WHERE owner.id = badge.owner_id AND event.badge_hex = badge.badge_hex '
                     'AND event.time >= ? AND event.time <= ?;', (time_from, time_to))
         result = cur.fetchall()
         table = []
         for record in result:
-            name = result[0]
-            timestamp = result[1]
-            badge = result[2]
+            name = record[0]
+            timestamp = record[1]
+            badge = record[2]
             time_obj = QDateTime.fromSecsSinceEpoch(timestamp)
             date_str = time_obj.toString('dd.MM.yyyy')
             time_str = time_obj.toString('hh:mm:ss')
