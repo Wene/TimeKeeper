@@ -47,6 +47,7 @@ class DB(QObject):
         cur.execute('INSERT INTO "owner" ("name") VALUES (?)', (name,))
         cur.execute('SELECT last_insert_rowid()')
         result = cur.fetchone()
+        cur.close()
         new_id = result[0]
         return new_id
 
@@ -58,6 +59,7 @@ class DB(QObject):
                     (owner_id, badge_hex, valid_since))
         cur.execute('SELECT last_insert_rowid()')
         result = cur.fetchone()
+        cur.close()
         new_id = result[0]
         return new_id
 
@@ -72,6 +74,8 @@ class DB(QObject):
                     'WHERE owner.id = badge.owner_id AND event.badge_hex = badge.badge_hex '
                     'AND event.time >= ? AND event.time <= ?;', (time_from, time_to))
         result = cur.fetchall()
+        cur.close()
+
         table = []
         for record in result:
             name = record[0]
