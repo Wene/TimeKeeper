@@ -72,7 +72,7 @@ class DB(QObject):
         cur = self.conn.cursor()
         cur.execute('SELECT owner.name FROM owner, badge '
                     'WHERE owner.id = badge.owner_id AND badge.badge_hex = ? AND badge.valid_since <= ? '
-                    'ORDER BY badge.valid_since;', (badge, time))
+                    'ORDER BY badge.valid_since DESC;', (badge, time))
         result = cur.fetchone()
         cur.close()
 
