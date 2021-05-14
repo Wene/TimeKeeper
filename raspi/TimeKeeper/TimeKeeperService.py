@@ -103,10 +103,9 @@ class TimeKeeperService(QObject):
             self.serial.send('heartbeat response')
         elif line.startswith(id_identifier):
             id_str = line[len(id_identifier):]
-            id_int = int(id_str, 0)
+            name = self.db.get_valid_badge_owner(id_str, self.last_time_stamp)
             self.time_update_timer.stop()
             self.resume_timer.start()
-            self.serial.send(f'print 0 {id_str}')
-            self.serial.send(f'print 1 {str(id_int)}')
+            self.serial.send(f'print 1 {name}')
             self.db.log_event(self.last_time_stamp, id_str, self.source_name)
 
