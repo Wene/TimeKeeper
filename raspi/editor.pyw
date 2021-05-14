@@ -3,7 +3,28 @@
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
+from PyQt5.QtNetwork import *
 from TimeKeeper import DB
+
+
+class Network(QObject):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.listener = QUdpSocket()
+        self.listener.bind(QHostAddress.Any, 9363)
+        self.listener.readyRead.connect(self.incoming)
+
+    @pyqtSlot()
+    def incoming(self):
+        while self.listener.hasPendingDatagrams():
+            data = self.listener.receiveDatagram()
+            text = str(data.data(), encoding='utf8')
+            sender = data.senderAddress()
+            port = data.senderPort()
+            identifier = 'TimeKeeper server name: '
+            if text.startswith(identifier):
+                name = text[len(identifier):]
+                print(f'got connection from {name.rstrip()}')
 
 
 class Form(QWidget):
@@ -29,6 +50,7 @@ class Form(QWidget):
         btn_layout.addWidget(self.btn_quit)
 
         self.db = DB(self, 'timekeeper.db')
+        self.network = Network(self)
 
         self.resize(self.settings.value('windowSize', QSize(50, 50)))
         self.move(self.settings.value('windowPosition', QPoint(50, 50)))
