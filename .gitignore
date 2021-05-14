@@ -1,2 +1,5 @@
 *.stl
 *.gcode
+*.db
+*__pycache__
+raspi/.idea
