@@ -45,12 +45,15 @@ class SerialInterface(QObject):
 
     def read_data(self):
         new_bytes = self.port.readAll()
-        self.buffer += new_bytes.data().decode('utf-8')
-        while '\n' in self.buffer:
-            pos = self.buffer.find('\n')
-            send_text = self.buffer[:pos].rstrip()
-            self.buffer = self.buffer[pos:].lstrip()
-            self.new_line.emit(send_text)
+        try:
+            self.buffer += new_bytes.data().decode('utf-8')
+            while '\n' in self.buffer:
+                pos = self.buffer.find('\n')
+                send_text = self.buffer[:pos].rstrip()
+                self.buffer = self.buffer[pos:].lstrip()
+                self.new_line.emit(send_text)
+        except UnicodeDecodeError:
+            self.buffer = ''
 
     @pyqtSlot(str)
     def send(self, text: str):
