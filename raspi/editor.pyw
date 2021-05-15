@@ -16,13 +16,12 @@ class Network(QObject):
         self.search_timer = QTimer()
         self.search_timer.setInterval(2000)
         self.search_timer.timeout.connect(self.continue_asking)
-        self.start_asking()
-        self.ask_times = 0
 
     def ask(self, sok: QUdpSocket):
         sok.writeDatagram('I\'m looking for TimeKeeper hosts.'.encode('utf8'),
                           QHostAddress('FF02::1'), 9363)
 
+    @pyqtSlot()
     def start_asking(self):
         for address in QNetworkInterface.allAddresses():
             if address.protocol() == QAbstractSocket.IPv6Protocol:
@@ -35,10 +34,15 @@ class Network(QObject):
         self.search_timer.start()
 
     @pyqtSlot()
+    def stop_asking(self):
+        self.search_timer.stop()
+        sok: QUdpSocket
+        for sok in self.sockets:
+            sok.close()
+        self.sockets.clear()
+
+    @pyqtSlot()
     def continue_asking(self):
-        self.ask_times += 1
-        if 20 < self.ask_times:
-            self.search_timer.stop()
         sok: QUdpSocket
         for sok in self.sockets:
             self.ask(sok)
@@ -89,6 +93,7 @@ class Form(QWidget):
 
         self.network = Network(self)
         self.network.host_found.connect(self.new_host_found)
+        self.network.start_asking()
 
         self.resize(self.settings.value('windowSize', QSize(50, 50)))
         self.move(self.settings.value('windowPosition', QPoint(50, 50)))
@@ -114,6 +119,7 @@ class Form(QWidget):
             existing_name = self.selector.itemText(i)
             if existing_name == name:
                 already_existing = True
+                self.network.stop_asking()
                 break
         if not already_existing:
             self.selector.addItem(name, (address, port))
