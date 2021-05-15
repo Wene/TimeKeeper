@@ -12,22 +12,36 @@ class Network(QObject):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        # self.mcast_listener = QUdpSocket(self)
-        # self.mcast_listener.bind(QHostAddress.Any, 9363)
-        # self.mcast_listener.readyRead.connect(self.incoming)
         self.sockets = []
+        self.search_timer = QTimer()
+        self.search_timer.setInterval(2000)
+        self.search_timer.timeout.connect(self.continue_asking)
         self.start_asking()
+        self.ask_times = 0
+
+    def ask(self, sok: QUdpSocket):
+        sok.writeDatagram('I\'m looking for TimeKeeper hosts.'.encode('utf8'),
+                          QHostAddress('FF02::1'), 9363)
 
     def start_asking(self):
         for address in QNetworkInterface.allAddresses():
             if address.protocol() == QAbstractSocket.IPv6Protocol:
                 if address.isLinkLocal():
-                    sender = QUdpSocket(self)
-                    self.sockets.append(sender)
-                    sender.bind(address, 0)
-                    sender.readyRead.connect(self.incoming)
-                    sent = sender.writeDatagram('I\'m looking for TimeKeeper hosts.'.encode('utf8'),
-                                                QHostAddress('FF02::1'), 9363)
+                    sok = QUdpSocket(self)
+                    self.sockets.append(sok)
+                    sok.bind(address, 0)
+                    sok.readyRead.connect(self.incoming)
+                    self.ask(sok)
+        self.search_timer.start()
+
+    @pyqtSlot()
+    def continue_asking(self):
+        self.ask_times += 1
+        if 20 < self.ask_times:
+            self.search_timer.stop()
+        sok: QUdpSocket
+        for sok in self.sockets:
+            self.ask(sok)
 
     @pyqtSlot()
     def incoming(self):
@@ -95,7 +109,14 @@ class Form(QWidget):
         if not self.selector.isEnabled():
             self.selector.clear()
             self.selector.setEnabled(True)
-        self.selector.addItem(name, (address, port))
+        already_existing = False
+        for i in range(self.selector.count()):
+            existing_name = self.selector.itemText(i)
+            if existing_name == name:
+                already_existing = True
+                break
+        if not already_existing:
+            self.selector.addItem(name, (address, port))
 
 
 if __name__ == '__main__':
