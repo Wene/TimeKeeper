@@ -109,6 +109,7 @@ class TimeKeeperService(QObject):
             name = self.db.get_valid_badge_owner(id_str, self.last_time_stamp)
             self.time_update_timer.stop()
             self.resume_timer.start()
+            print(f'Got event from "{name}" at {self.last_time_stamp}')
             self.serial.send(f'print 1 {name}')
             self.db.log_event(self.last_time_stamp, id_str, self.source_name)
 

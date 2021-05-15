@@ -24,7 +24,7 @@ class DB(QObject):
         cur.close()
         self.conn.commit()
 
-    def log_event(self, timestamp: int, badge: str, source: str):
+    def get_source_id(self, source: str):
         cur = self.conn.cursor()
         cur.execute('SELECT "id" FROM "source" WHERE "name" = ?', (source,))
         result = cur.fetchone()
@@ -33,9 +33,27 @@ class DB(QObject):
             cur.execute('SELECT last_insert_rowid()')
             result = cur.fetchone()
         source_id = result[0]
-        cur.execute('INSERT INTO event (badge_hex, time, source_id) VALUES (?, ?, ?)', (badge, timestamp, source_id))
         cur.close()
-        self.conn.commit()
+        return source_id
+
+    def event_exists(self, timestamp: int, badge: str):
+        existing = False
+        cur = self.conn.cursor()
+        cur.execute('SELECT id FROM event WHERE badge_hex = ? AND time = ?', (badge, timestamp))
+        result = cur.fetchone()
+        if result:
+            existing = True
+        cur.close()
+        return existing
+
+    def log_event(self, timestamp: int, badge: str, source: str):
+        source_id = self.get_source_id(source)
+        if not self.event_exists(timestamp, badge):
+            cur = self.conn.cursor()
+            cur.execute('INSERT INTO event (badge_hex, time, source_id) VALUES (?, ?, ?)',
+                        (badge, timestamp, source_id))
+            cur.close()
+            self.conn.commit()
 
     def get_owner_id_by_nme(self, name: str):
         cur = self.conn.cursor()
