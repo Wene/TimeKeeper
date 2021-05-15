@@ -8,6 +8,8 @@ from TimeKeeper import DB
 
 
 class Network(QObject):
+    host_found = pyqtSignal(str, QHostAddress, int)
+
     def __init__(self, parent=None):
         super().__init__(parent)
         # self.mcast_listener = QUdpSocket(self)
@@ -26,7 +28,6 @@ class Network(QObject):
                     sender.readyRead.connect(self.incoming)
                     sent = sender.writeDatagram('I\'m looking for TimeKeeper hosts.'.encode('utf8'),
                                                 QHostAddress('FF02::1'), 9363)
-                    print(sent, 'bytes sent')
 
     @pyqtSlot()
     def incoming(self):
@@ -34,10 +35,13 @@ class Network(QObject):
         for sok in self.sockets:
             while sok.hasPendingDatagrams():
                 data = sok.receiveDatagram()
-                text = str(data.data(), encoding='utf8')
                 sender = data.senderAddress()
                 port = data.senderPort()
-                print(f'got answer: "{text}" from [{sender.toString()}]:{port}')
+                text = str(data.data(), encoding='utf8')
+                identifier = 'Hi, this is TimeKeeper '
+                if text.startswith(identifier):
+                    name = text[len(identifier):]
+                    self.host_found.emit(name, sender, port)
 
 
 class Form(QWidget):
@@ -47,6 +51,11 @@ class Form(QWidget):
         self.setWindowTitle('TimeKeeper Editor')
 
         layout = QVBoxLayout(self)
+        self.selector = QComboBox()
+        self.selector.addItem('Searching for TimeKeeper...')
+        self.selector.setEnabled(False)
+        layout.addWidget(self.selector)
+
         self.editor = QPlainTextEdit()
         self.editor.setReadOnly(True)
         self.editor.setUndoRedoEnabled(False)
@@ -63,7 +72,9 @@ class Form(QWidget):
         btn_layout.addWidget(self.btn_quit)
 
         self.db = DB(self, 'timekeeper.db')
+
         self.network = Network(self)
+        self.network.host_found.connect(self.new_host_found)
 
         self.resize(self.settings.value('windowSize', QSize(50, 50)))
         self.move(self.settings.value('windowPosition', QPoint(50, 50)))
@@ -78,6 +89,13 @@ class Form(QWidget):
         for line in data:
             line_str = '|'.join(line)
             self.editor.appendPlainText(line_str)
+
+    @pyqtSlot(str, QHostAddress, int)
+    def new_host_found(self, name: str, address: QHostAddress, port: int):
+        if not self.selector.isEnabled():
+            self.selector.clear()
+            self.selector.setEnabled(True)
+        self.selector.addItem(name, (address, port))
 
 
 if __name__ == '__main__':

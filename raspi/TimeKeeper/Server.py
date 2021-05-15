@@ -3,13 +3,14 @@
 from PyQt5.QtCore import *
 from PyQt5.QtNetwork import *
 
+
 class Server(QObject):
-    def __init__(self, parent=None):
+    def __init__(self, name: str, parent=None):
         super().__init__(parent)
         self.mcast_listener = QUdpSocket(self)
         self.mcast_listener.bind(QHostAddress.Any, 9363)
         self.mcast_listener.readyRead.connect(self.incoming)
-        print('Server created')
+        self.name = name
 
     @pyqtSlot()
     def incoming(self):
@@ -20,4 +21,4 @@ class Server(QObject):
             port = data.senderPort()
             print(f'got "{text.rstrip()}" from [{sender.toString()}]:{port}')
             if 'I\'m looking for TimeKeeper hosts.' == text:
-                self.mcast_listener.writeDatagram('Here I am!'.encode('utf8'), sender, port)
+                self.mcast_listener.writeDatagram(f'Hi, this is TimeKeeper {self.name}'.encode('utf8'), sender, port)
