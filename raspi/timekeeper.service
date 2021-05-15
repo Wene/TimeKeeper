@@ -5,6 +5,7 @@ Description=TimeKeeper service
 ExecStart=/home/pi/TimeKeeper/service.py
 WorkingDirectory=/home/pi/TimeKeeper
 User=pi
+Environment=PYTHONUNBUFFERED=1
 
 [Install]
 WantedBy=multi-user.target
