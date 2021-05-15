@@ -10,21 +10,34 @@ from TimeKeeper import DB
 class Network(QObject):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.listener = QUdpSocket()
-        self.listener.bind(QHostAddress.Any, 9363)
-        self.listener.readyRead.connect(self.incoming)
+        # self.mcast_listener = QUdpSocket(self)
+        # self.mcast_listener.bind(QHostAddress.Any, 9363)
+        # self.mcast_listener.readyRead.connect(self.incoming)
+        self.sockets = []
+        self.start_asking()
+
+    def start_asking(self):
+        for address in QNetworkInterface.allAddresses():
+            if address.protocol() == QAbstractSocket.IPv6Protocol:
+                if address.isLinkLocal():
+                    sender = QUdpSocket(self)
+                    self.sockets.append(sender)
+                    sender.bind(address, 0)
+                    sender.readyRead.connect(self.incoming)
+                    sent = sender.writeDatagram('I\'m looking for TimeKeeper hosts.'.encode('utf8'),
+                                                QHostAddress('FF02::1'), 9363)
+                    print(sent, 'bytes sent')
 
     @pyqtSlot()
     def incoming(self):
-        while self.listener.hasPendingDatagrams():
-            data = self.listener.receiveDatagram()
-            text = str(data.data(), encoding='utf8')
-            sender = data.senderAddress()
-            port = data.senderPort()
-            identifier = 'TimeKeeper server name: '
-            if text.startswith(identifier):
-                name = text[len(identifier):]
-                print(f'got connection from {name.rstrip()}')
+        sok: QUdpSocket
+        for sok in self.sockets:
+            while sok.hasPendingDatagrams():
+                data = sok.receiveDatagram()
+                text = str(data.data(), encoding='utf8')
+                sender = data.senderAddress()
+                port = data.senderPort()
+                print(f'got answer: "{text}" from [{sender.toString()}]:{port}')
 
 
 class Form(QWidget):

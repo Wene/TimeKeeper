@@ -3,6 +3,7 @@
 from PyQt5.QtCore import *
 from .SerialInterface import SerialInterface
 from .DB import DB
+from .Server import Server
 import signal
 
 
@@ -47,6 +48,8 @@ class TimeKeeperService(QObject):
         self.resume_timer.timeout.connect(self.resume)
 
         self.db = DB(self, 'timekeeper.db')
+
+        self.server = Server(self)
 
     def signal_handler(self, sig_num, stack_frame):
         self.reopen_timer.stop()
