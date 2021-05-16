@@ -9,6 +9,7 @@ from TimeKeeper import DB
 
 class Network(QObject):
     host_found = pyqtSignal(str, QHostAddress, int)
+    disconnected = pyqtSignal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -18,6 +19,8 @@ class Network(QObject):
         self.search_timer.timeout.connect(self.continue_asking)
 
         self.host_socket = QTcpSocket(self)
+        self.host_socket.connected.connect(self.connection_test)
+        self.host_socket.disconnected.connect(self.connection_lost)
 
     def ask(self, sok: QUdpSocket):
         sok.writeDatagram('I\'m looking for TimeKeeper hosts.'.encode('utf8'),
@@ -65,7 +68,6 @@ class Network(QObject):
 
     def connect_to_host(self, address: QHostAddress, port: int):
         self.host_socket.connectToHost(address, port)
-        self.host_socket.connected.connect(self.connection_test)
         self.host_socket.readyRead.connect(self.read)
 
     @pyqtSlot()
@@ -75,9 +77,15 @@ class Network(QObject):
     @pyqtSlot()
     def read(self):
         size = self.host_socket.bytesAvailable()
-        data = self.host_socket.read(size)
-        text = data.decode()
-        print(f'got answer: {text}')
+        if size > 0:
+            data = self.host_socket.read(size)
+            text = data.decode()
+            print(f'got answer: {text}')
+            self.host_socket.close()
+
+    @pyqtSlot()
+    def connection_lost(self):
+        self.disconnected.emit()
 
 
 class Form(QWidget):
@@ -119,6 +127,7 @@ class Form(QWidget):
         self.network = Network(self)
         self.network.host_found.connect(self.new_host_found)
         self.network.start_asking()
+        self.network.disconnected.connect(self.connection_closed)
 
         self.resize(self.settings.value('windowSize', QSize(50, 50)))
         self.move(self.settings.value('windowPosition', QPoint(50, 50)))
@@ -159,6 +168,10 @@ class Form(QWidget):
         address, port = self.selector.currentData(Qt.UserRole)
         self.network.connect_to_host(address, port)
         self.enable_selector(False)
+
+    @pyqtSlot()
+    def connection_closed(self):
+        self.enable_selector(True)
 
 
 if __name__ == '__main__':
