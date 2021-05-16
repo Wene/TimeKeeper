@@ -12,10 +12,12 @@ class Network(QObject):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.sockets = []
+        self.ask_sockets = []
         self.search_timer = QTimer()
         self.search_timer.setInterval(2000)
         self.search_timer.timeout.connect(self.continue_asking)
+
+        self.host_socket = QTcpSocket(self)
 
     def ask(self, sok: QUdpSocket):
         sok.writeDatagram('I\'m looking for TimeKeeper hosts.'.encode('utf8'),
@@ -27,7 +29,7 @@ class Network(QObject):
             if address.protocol() == QAbstractSocket.IPv6Protocol:
                 if address.isLinkLocal():
                     sok = QUdpSocket(self)
-                    self.sockets.append(sok)
+                    self.ask_sockets.append(sok)
                     sok.bind(address, 0)
                     sok.readyRead.connect(self.incoming)
                     self.ask(sok)
@@ -37,20 +39,20 @@ class Network(QObject):
     def stop_asking(self):
         self.search_timer.stop()
         sok: QUdpSocket
-        for sok in self.sockets:
+        for sok in self.ask_sockets:
             sok.close()
-        self.sockets.clear()
+        self.ask_sockets.clear()
 
     @pyqtSlot()
     def continue_asking(self):
         sok: QUdpSocket
-        for sok in self.sockets:
+        for sok in self.ask_sockets:
             self.ask(sok)
 
     @pyqtSlot()
     def incoming(self):
         sok: QUdpSocket
-        for sok in self.sockets:
+        for sok in self.ask_sockets:
             while sok.hasPendingDatagrams():
                 data = sok.receiveDatagram()
                 sender = data.senderAddress()
@@ -61,6 +63,22 @@ class Network(QObject):
                     name = text[len(identifier):]
                     self.host_found.emit(name, sender, port)
 
+    def connect_to_host(self, address: QHostAddress, port: int):
+        self.host_socket.connectToHost(address, port)
+        self.host_socket.connected.connect(self.connection_test)
+        self.host_socket.readyRead.connect(self.read)
+
+    @pyqtSlot()
+    def connection_test(self):
+        self.host_socket.write('ping'.encode())
+
+    @pyqtSlot()
+    def read(self):
+        size = self.host_socket.bytesAvailable()
+        data = self.host_socket.read(size)
+        text = data.decode()
+        print(f'got answer: {text}')
+
 
 class Form(QWidget):
     def __init__(self, parent=None):
@@ -69,10 +87,17 @@ class Form(QWidget):
         self.setWindowTitle('TimeKeeper Editor')
 
         layout = QVBoxLayout(self)
+
+        lay_conn = QHBoxLayout()
+        layout.addLayout(lay_conn)
         self.selector = QComboBox()
         self.selector.addItem('Searching for TimeKeeper...')
         self.selector.setEnabled(False)
-        layout.addWidget(self.selector)
+        lay_conn.addWidget(self.selector)
+        self.btn_connect = QPushButton('&Connect')
+        self.btn_connect.setEnabled(False)
+        self.btn_connect.clicked.connect(self.establish_connection)
+        lay_conn.addWidget(self.btn_connect)
 
         self.editor = QPlainTextEdit()
         self.editor.setReadOnly(True)
@@ -111,9 +136,10 @@ class Form(QWidget):
 
     @pyqtSlot(str, QHostAddress, int)
     def new_host_found(self, name: str, address: QHostAddress, port: int):
-        if not self.selector.isEnabled():
+        if not self.selector.isEnabled():     # TODO: find another indicator for empty list since selector gets disabled when in use, too
             self.selector.clear()
             self.selector.setEnabled(True)
+            self.btn_connect.setEnabled(True)
         already_existing = False
         for i in range(self.selector.count()):
             existing_name = self.selector.itemText(i)
@@ -123,6 +149,13 @@ class Form(QWidget):
                 break
         if not already_existing:
             self.selector.addItem(name, (address, port))
+
+    @pyqtSlot()
+    def establish_connection(self):
+        address, port = self.selector.currentData(Qt.UserRole)
+        self.network.connect_to_host(address, port)
+        self.selector.setEnabled(False)
+        self.btn_connect.setEnabled(False)
 
 
 if __name__ == '__main__':

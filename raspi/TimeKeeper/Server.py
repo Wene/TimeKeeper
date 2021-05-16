@@ -15,6 +15,11 @@ class Connection(QObject):
     def read(self):
         size = self.socket.bytesAvailable()
         data = self.socket.read(size)
+        text = data.decode()
+        answer = 'unknown'
+        if 'ping' == text:
+            answer = 'pong'
+        self.socket.write(answer.encode())
 
     @pyqtSlot()
     def cleanup(self):
