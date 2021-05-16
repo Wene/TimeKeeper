@@ -11,6 +11,10 @@ class Connection(QObject):
         self.socket.readyRead.connect(self.read)
         self.socket.disconnected.connect(self.cleanup)
 
+        self.address = self.socket.peerAddress()
+        self.port = self.socket.peerPort()
+        print(f'new connection established to [{self.address.toString()}]:{self.port}')
+
     @pyqtSlot()
     def read(self):
         size = self.socket.bytesAvailable()
@@ -23,6 +27,7 @@ class Connection(QObject):
 
     @pyqtSlot()
     def cleanup(self):
+        print(f'connection to [{self.address.toString()}]:{self.port} got disconnected')
         self.deleteLater()
 
     @pyqtSlot()
