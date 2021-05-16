@@ -95,9 +95,9 @@ class Form(QWidget):
         self.selector_empty = True
         lay_conn.addWidget(self.selector)
         self.btn_connect = QPushButton('&Connect')
-        self.btn_connect.setEnabled(False)
         self.btn_connect.clicked.connect(self.establish_connection)
         lay_conn.addWidget(self.btn_connect)
+        self.enable_selector(False)
 
         self.editor = QPlainTextEdit()
         self.editor.setReadOnly(True)
@@ -134,13 +134,16 @@ class Form(QWidget):
             line_str = '|'.join(line)
             self.editor.appendPlainText(line_str)
 
+    def enable_selector(self, enable: bool):
+        self.selector.setEnabled(enable)
+        self.btn_connect.setEnabled(enable)
+
     @pyqtSlot(str, QHostAddress, int)
     def new_host_found(self, name: str, address: QHostAddress, port: int):
         if self.selector_empty:
             self.selector_empty = False
             self.selector.clear()
-            self.selector.setEnabled(True)
-            self.btn_connect.setEnabled(True)
+            self.enable_selector(True)
         already_existing = False
         for i in range(self.selector.count()):
             existing_name = self.selector.itemText(i)
@@ -155,8 +158,7 @@ class Form(QWidget):
     def establish_connection(self):
         address, port = self.selector.currentData(Qt.UserRole)
         self.network.connect_to_host(address, port)
-        self.selector.setEnabled(False)
-        self.btn_connect.setEnabled(False)
+        self.enable_selector(False)
 
 
 if __name__ == '__main__':
