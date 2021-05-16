@@ -1,7 +1,18 @@
 #!/usr/bin/env python3
 
+import re
 from PyQt5.QtCore import *
 from PyQt5.QtNetwork import *
+
+
+class Response(QObject):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+    @pyqtSlot(QByteArray)
+    def answer(self, data: QByteArray):
+        # TODO: send the data somehow
+        pass
 
 
 class Connection(QObject):
@@ -15,15 +26,34 @@ class Connection(QObject):
         self.port = self.socket.peerPort()
         print(f'new connection established to [{self.address.toString()}]:{self.port}')
 
+    def parse_request(self, request: str):
+        match = re.match(r'get events between (\d+) and (\d+)', request)
+        if match:
+            from_time = int(match.group(1))
+            to_time = int(match.group(2))
+            response = Response(self)
+            # TODO: do something to request the data
+            # TODO: connect whatever providing the answer with to response.answer
+            return True
+        else:
+            return False
+
     @pyqtSlot()
     def read(self):
         size = self.socket.bytesAvailable()
-        data = self.socket.read(size)
-        text = data.decode()
-        answer = 'unknown'
-        if 'ping' == text:
-            answer = 'pong'
-        self.socket.write(answer.encode())
+        if size > 0:
+            data = self.socket.read(size)
+            text = data.decode()
+            answer = 'unknown request'
+            if 'ping' == text:
+                answer = 'pong'
+            elif text.startswith('get'):
+                result = self.parse_request(text)
+                if result:
+                    answer = 'processing...'
+                else:
+                    answer = 'request failed'
+            self.socket.write(answer.encode())
 
     @pyqtSlot()
     def cleanup(self):
