@@ -92,7 +92,7 @@ class Form(QWidget):
         layout.addLayout(lay_conn)
         self.selector = QComboBox()
         self.selector.addItem('Searching for TimeKeeper...')
-        self.selector.setEnabled(False)
+        self.selector_empty = True
         lay_conn.addWidget(self.selector)
         self.btn_connect = QPushButton('&Connect')
         self.btn_connect.setEnabled(False)
@@ -136,7 +136,8 @@ class Form(QWidget):
 
     @pyqtSlot(str, QHostAddress, int)
     def new_host_found(self, name: str, address: QHostAddress, port: int):
-        if not self.selector.isEnabled():     # TODO: find another indicator for empty list since selector gets disabled when in use, too
+        if self.selector_empty:
+            self.selector_empty = False
             self.selector.clear()
             self.selector.setEnabled(True)
             self.btn_connect.setEnabled(True)
