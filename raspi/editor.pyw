@@ -10,6 +10,7 @@ from TimeKeeper import DB
 class Network(QObject):
     host_found = pyqtSignal(str, QHostAddress, int)
     disconnected = pyqtSignal()
+    new_data = pyqtSignal(bytes)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -72,15 +73,15 @@ class Network(QObject):
 
     @pyqtSlot()
     def connection_test(self):
-        self.host_socket.write('ping'.encode())
+        now = QDateTime.currentDateTime().toSecsSinceEpoch()
+        self.host_socket.write(f'get events between 0 and {now}'.encode())
 
     @pyqtSlot()
     def read(self):
         size = self.host_socket.bytesAvailable()
         if size > 0:
             data = self.host_socket.read(size)
-            text = data.decode()
-            print(f'got answer: {text}')
+            self.new_data.emit(data)
             self.host_socket.close()
 
     @pyqtSlot()
@@ -128,6 +129,7 @@ class Form(QWidget):
         self.network.host_found.connect(self.new_host_found)
         self.network.start_asking()
         self.network.disconnected.connect(self.connection_closed)
+        self.network.new_data.connect(self.show_data)
 
         self.resize(self.settings.value('windowSize', QSize(50, 50)))
         self.move(self.settings.value('windowPosition', QPoint(50, 50)))
@@ -172,6 +174,11 @@ class Form(QWidget):
     @pyqtSlot()
     def connection_closed(self):
         self.enable_selector(True)
+
+    @pyqtSlot(bytes)
+    def show_data(self, data: bytes):
+        text = data.decode()
+        self.editor.appendPlainText(text)
 
 
 if __name__ == '__main__':
