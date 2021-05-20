@@ -50,6 +50,7 @@ class TimeKeeperService(QObject):
         self.db = DB(self, 'timekeeper.db')
 
         self.server = Server(self.source_name, self)
+        self.server.request_events.connect(self.db.answer_request_events)
 
     def signal_handler(self, sig_num, stack_frame):
         self.reopen_timer.stop()

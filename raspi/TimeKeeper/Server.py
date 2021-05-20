@@ -3,19 +3,23 @@
 import re
 from PyQt5.QtCore import *
 from PyQt5.QtNetwork import *
+from PyQt5.QtNetwork import QTcpSocket
 
 
 class Response(QObject):
-    def __init__(self, parent=None):
+    def __init__(self, socket: QTcpSocket, parent=None):
         super().__init__(parent)
+        self.socket = socket
 
     @pyqtSlot(QByteArray)
     def answer(self, data: QByteArray):
-        # TODO: send the data somehow
-        pass
+        self.socket.write(data)
+        self.deleteLater()
 
 
 class Connection(QObject):
+    conn_requests_events = pyqtSignal(int, int, Response)
+
     def __init__(self, socket: QTcpSocket, parent=None):
         super().__init__(parent)
         self.socket = socket
@@ -31,9 +35,8 @@ class Connection(QObject):
         if match:
             from_time = int(match.group(1))
             to_time = int(match.group(2))
-            response = Response(self)
-            # TODO: do something to request the data
-            # TODO: connect whatever providing the answer with to response.answer
+            response = Response(self.socket, self)
+            self.conn_requests_events.emit(from_time, to_time, response)
             return True
         else:
             return False
@@ -66,6 +69,8 @@ class Connection(QObject):
 
 
 class Server(QObject):
+    request_events = pyqtSignal(int, int, Response)
+
     def __init__(self, name: str, parent=None):
         super().__init__(parent)
         self.mcast_listener = QUdpSocket(self)
@@ -93,4 +98,9 @@ class Server(QObject):
     def connect(self):
         while self.tcp_server.hasPendingConnections():
             socket = self.tcp_server.nextPendingConnection()
-            Connection(socket, self)    # by setting self as parent, this instance will last until self gets deleted
+            conn = Connection(socket, self)    # by setting self as parent, this instance will last until self gets deleted
+            conn.conn_requests_events.connect(self.forward_request)
+
+    @pyqtSlot(int, int, Response)
+    def forward_request(self, time_from, time_to, response):
+        self.request_events.emit(time_from, time_to, response)
