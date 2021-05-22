@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from PyQt5.QtCore import *
-from .Server import Response
+from .Server import NetRequest
 import sqlite3
 
 
@@ -118,12 +118,13 @@ class DB(QObject):
             table.append((date_str, time_str, name))
         return table
 
-    @pyqtSlot(int, int, Response)
-    def answer_request_events(self, time_from: int, time_to: int, response: Response):
-        result = self.get_events_between_timestamps(time_from, time_to)
-        lines = []
-        for element in result:
-            lines.append('\t'.join(element))
-        text_block = '\n'.join(lines)
-        data = QByteArray(text_block.encode())
-        response.answer(data)
+    @pyqtSlot(NetRequest)
+    def answer_net_request(self, request: NetRequest):
+        if request.type == 'events':
+            result = self.get_events_between_timestamps(request.params[0], request.params[1])
+            lines = []
+            for element in result:
+                lines.append('\t'.join(element))
+            text_block = '\n'.join(lines)
+            data = QByteArray(text_block.encode())
+            request.answer(data)
