@@ -125,6 +125,9 @@ class DB(QObject):
             lines = []
             for element in result:
                 lines.append('\t'.join(element))
-            text_block = '\n'.join(lines)
+            text_block = '\n'.join(lines) + '\n'
             data = QByteArray(text_block.encode())
             request.answer(data)
+        elif request.type == 'owners':
+            result = self.get_owners()  # TODO: implement this
+

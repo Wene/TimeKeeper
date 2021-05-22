@@ -25,6 +25,7 @@ class NetRequest(QObject):
 
     def answer(self, data: QByteArray):
         self.socket.write(data)
+        self.socket.write('<<< done\n'.encode())
         self.deleteLater()
 
 
@@ -64,17 +65,15 @@ class Connection(QObject):
         if size > 0:
             data = self.socket.read(size)
             text = data.decode()
-            if 'ping' == text:
-                self.socket.write('pong'.encode())
-            elif text.startswith('get'):
+            if text.startswith('get'):
                 request = self.parse_request(text)
                 if request:
-                    self.socket.write('processing...'.encode())
+                    self.socket.write('<<< processing...\n'.encode())
                     self.new_request.emit(request)
                 else:
-                    self.socket.write('request failed'.encode())
+                    self.socket.write('<<< request failed\n'.encode())
             else:
-                self.socket.write('unknown request'.encode())
+                self.socket.write('<<< unknown request\n'.encode())
 
     @pyqtSlot()
     def cleanup(self):

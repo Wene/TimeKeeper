@@ -10,7 +10,7 @@ from TimeKeeper import DB
 class Network(QObject):
     host_found = pyqtSignal(str, QHostAddress, int)
     disconnected = pyqtSignal()
-    new_data = pyqtSignal(bytes)
+    new_data = pyqtSignal(list)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -22,6 +22,9 @@ class Network(QObject):
         self.host_socket = QTcpSocket(self)
         self.host_socket.connected.connect(self.connection_test)
         self.host_socket.disconnected.connect(self.connection_lost)
+
+        self.line_cache = []
+        self.text_cache = ''
 
     def ask(self, sok: QUdpSocket):
         sok.writeDatagram('I\'m looking for TimeKeeper hosts.'.encode('utf8'),
@@ -81,8 +84,21 @@ class Network(QObject):
         size = self.host_socket.bytesAvailable()
         if size > 0:
             data = self.host_socket.read(size)
-            self.new_data.emit(data)
-            self.host_socket.close()
+            text = self.text_cache + data.decode()
+            self.text_cache = ''
+            lines = text.split('\n')
+            for line in lines:
+                if '<<< processing...' == line:
+                    self.line_cache.clear()
+                elif '<<< done' == line:
+                    self.new_data.emit(self.line_cache)
+                    self.line_cache.clear()
+                    self.host_socket.close()    # TODO: remove this when multiple actions become available
+                elif '' != line:
+                    self.line_cache.append(line)
+            if '' != lines[-1]:
+                self.text_cache = self.line_cache.pop()
+
 
     @pyqtSlot()
     def connection_lost(self):
@@ -175,10 +191,10 @@ class Form(QWidget):
     def connection_closed(self):
         self.enable_selector(True)
 
-    @pyqtSlot(bytes)
-    def show_data(self, data: bytes):
-        text = data.decode()
-        self.editor.appendPlainText(text)
+    @pyqtSlot(list)
+    def show_data(self, lines: list):
+        for line in lines:
+            self.editor.appendPlainText(line)
 
 
 if __name__ == '__main__':
