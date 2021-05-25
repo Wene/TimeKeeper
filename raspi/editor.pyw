@@ -141,6 +141,7 @@ class Form(QWidget):
         lay_getters.addWidget(self.sel_to)
         self.btn_get_events = QPushButton('Get Events')
         self.btn_get_events.clicked.connect(self.get_events)
+        self.btn_get_events.setEnabled(False)
         lay_getters.addWidget(self.btn_get_events)
 
         self.editor = QPlainTextEdit()
@@ -165,6 +166,7 @@ class Form(QWidget):
         self.network.start_asking()
         self.network.disconnected.connect(self.connection_closed)
         self.network.new_data.connect(self.show_data)
+        self.network.connected.connect(self.connection_established)
 
         self.resize(self.settings.value('windowSize', QSize(50, 50)))
         self.move(self.settings.value('windowPosition', QPoint(50, 50)))
@@ -217,6 +219,11 @@ class Form(QWidget):
     @pyqtSlot()
     def connection_closed(self):
         self.sel_host.setEnabled(True)
+        self.btn_get_events.setEnabled(False)
+
+    @pyqtSlot()
+    def connection_established(self):
+        self.btn_get_events.setEnabled(True)
 
     @pyqtSlot(list)
     def show_data(self, lines: list):
