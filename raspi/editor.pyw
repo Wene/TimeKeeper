@@ -4,7 +4,6 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtNetwork import *
-from TimeKeeper import DB
 
 
 class Network(QObject):
@@ -149,17 +148,9 @@ class Form(QWidget):
         self.editor.setUndoRedoEnabled(False)
         layout.addWidget(self.editor)
 
-        btn_layout = QHBoxLayout()
-        layout.addLayout(btn_layout)
-
-        self.btn_read = QPushButton('Read')
-        self.btn_read.clicked.connect(self.read_db)
-        btn_layout.addWidget(self.btn_read)
         self.btn_quit = QPushButton('Quit')
         self.btn_quit.clicked.connect(self.close)
-        btn_layout.addWidget(self.btn_quit)
-
-        self.db = DB(self, 'timekeeper.db')
+        layout.addWidget(self.btn_quit)
 
         self.network = Network(self)
         self.network.host_found.connect(self.new_host_found)
@@ -174,13 +165,6 @@ class Form(QWidget):
     def closeEvent(self, a0: QCloseEvent) -> None:
         self.settings.setValue('windowSize', self.size())
         self.settings.setValue('windowPosition', self.pos())
-
-    @pyqtSlot()
-    def read_db(self):
-        data = self.db.get_events_between_timestamps(0, QDateTime.currentDateTime().toSecsSinceEpoch())
-        for line in data:
-            line_str = '|'.join(line)
-            self.editor.appendPlainText(line_str)
 
     @pyqtSlot()
     def get_events(self):
