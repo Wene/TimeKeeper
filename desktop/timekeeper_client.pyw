@@ -15,7 +15,10 @@ class MainForm(QWidget):
         layout = QVBoxLayout(self)
 
         self.events = EventsViewer()
-        layout.addWidget(self.events)
+
+        tabs = QTabWidget()
+        layout.addWidget(tabs)
+        tabs.addTab(self.events, 'Events')
 
         self.btn_quit = QPushButton('Quit')
         self.btn_quit.clicked.connect(self.close)
