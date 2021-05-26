@@ -3,7 +3,7 @@
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
-from TimeKeeper import EventsViewer
+from TimeKeeper import EventsViewer, OwnerEditor, SettingsEditor
 
 
 class MainForm(QWidget):
@@ -14,15 +14,15 @@ class MainForm(QWidget):
 
         layout = QVBoxLayout(self)
 
-        self.events = EventsViewer()
+        events = EventsViewer()
+        owner = OwnerEditor()
+        settings = SettingsEditor()
 
         tabs = QTabWidget()
         layout.addWidget(tabs)
-        tabs.addTab(self.events, 'Events')
-
-        self.btn_quit = QPushButton('Quit')
-        self.btn_quit.clicked.connect(self.close)
-        layout.addWidget(self.btn_quit)
+        tabs.addTab(events, 'Events')
+        tabs.addTab(owner, 'Owner')
+        tabs.addTab(settings, 'Settings')
 
         self.load_settings()
 
