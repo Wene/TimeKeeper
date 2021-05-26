@@ -2,4 +2,4 @@
 *.gcode
 *.db
 *__pycache__
-raspi/.idea
+*/.idea
