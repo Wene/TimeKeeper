@@ -18,13 +18,13 @@ class MainForm(QWidget):
 
         events = EventsViewer()
         owner = OwnerEditor()
-        settings = SettingsEditor()
+        self.settings_widget = SettingsEditor(self.settings, self)
 
         tabs = QTabWidget()
         layout.addWidget(tabs)
         tabs.addTab(events, 'Events')
         tabs.addTab(owner, 'Owner')
-        tabs.addTab(settings, 'Settings')
+        tabs.addTab(self.settings_widget, 'Settings')
 
         self.load_settings()
 
@@ -33,6 +33,7 @@ class MainForm(QWidget):
         self.move(self.settings.value('windowPosition', QPoint(50, 50)))
 
     def closeEvent(self, a0: QCloseEvent) -> None:
+        self.settings_widget.store_settings()
         self.settings.setValue('windowSize', self.size())
         self.settings.setValue('windowPosition', self.pos())
 
