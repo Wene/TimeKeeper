@@ -36,4 +36,4 @@ if __name__ == '__main__':
     window = Form()
     window.show()
 
-    sys.exit(app.exec_())
+    app.exec()
