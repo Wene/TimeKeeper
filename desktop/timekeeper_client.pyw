@@ -3,7 +3,7 @@
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
-from TimeKeeper import EventsViewer, OwnerEditor, SettingsEditor
+from TimeKeeper import EventsViewer, OwnerEditor, SettingsEditor, Network
 
 
 class MainForm(QWidget):
@@ -11,6 +11,8 @@ class MainForm(QWidget):
         super().__init__(parent)
         self.settings = QSettings()
         self.setWindowTitle('TimeKeeper Client')
+
+        self.network = Network(self)
 
         layout = QVBoxLayout(self)
 

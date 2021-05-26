@@ -3,3 +3,4 @@
 from .EventsViewer import EventsViewer
 from .OwnerEditor import OwnerEditor
 from .SettingsEditor import SettingsEditor
+from .Network import Network
