@@ -18,6 +18,7 @@ class MainForm(QWidget):
 
         events = EventsViewer()
         owner = OwnerEditor()
+        owner.new_owner.connect(self.debug_print_new_owner)
         self.settings_widget = SettingsEditor(self.settings, self)
 
         tabs = QTabWidget()
@@ -35,6 +36,10 @@ class MainForm(QWidget):
     def closeEvent(self, a0: QCloseEvent) -> None:
         self.settings.setValue('windowSize', self.size())
         self.settings.setValue('windowPosition', self.pos())
+
+    @pyqtSlot(str, str, int)
+    def debug_print_new_owner(self, hex_str: str, name: str, timestamp: int):
+        print(f'{hex_str}\t{name}\t{timestamp}')
 
 
 if __name__ == '__main__':

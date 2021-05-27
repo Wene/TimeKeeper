@@ -49,4 +49,4 @@ class OwnerEditor(QWidget):
             if match:
                 hex_str = '0x' + match.group(2).lower()
                 name = match.group(3)
-                self.new_owner(hex_str, name, timestamp)
+                self.new_owner.emit(hex_str, name, timestamp)
