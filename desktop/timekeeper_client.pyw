@@ -33,7 +33,6 @@ class MainForm(QWidget):
         self.move(self.settings.value('windowPosition', QPoint(50, 50)))
 
     def closeEvent(self, a0: QCloseEvent) -> None:
-        self.settings_widget.store_settings()
         self.settings.setValue('windowSize', self.size())
         self.settings.setValue('windowPosition', self.pos())
 
