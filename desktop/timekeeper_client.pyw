@@ -17,6 +17,8 @@ class MainForm(QWidget):
         layout = QVBoxLayout(self)
 
         events = EventsViewer()
+        events.update_request.connect(self.network.get_events)
+        self.network.new_data.connect(events.display_data)
         owner = OwnerEditor()
         owner.new_owner.connect(self.debug_print_new_owner)
         self.settings_widget = SettingsEditor(self.settings, self)

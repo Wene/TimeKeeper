@@ -11,6 +11,8 @@ class SettingsEditor(QWidget):
 
         layout = QVBoxLayout(self)
 
+        layout.addWidget(QLabel('Default connection'))
+
         self.sel_host = QComboBox()
         self.sel_host.addItem('(no hosts found so far)')
         self.sel_host.setEnabled(False)

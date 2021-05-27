@@ -57,3 +57,8 @@ class EventsViewer(QWidget):
     def export(self):
         pass
 
+    @pyqtSlot(list)
+    def display_data(self, data: list):
+        self.content.clear()
+        for line in data:
+            self.content.appendPlainText(line)

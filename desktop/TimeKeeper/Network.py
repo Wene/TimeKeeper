@@ -75,7 +75,7 @@ class Network(QObject):
     def close_connection(self):
         self.host_socket.close()
 
-    @pyqtSlot()
+    @pyqtSlot(int, int)
     def get_events(self, time_from=0, time_to=None):
         if time_to is None:
             time_to = QDateTime.currentDateTime().toSecsSinceEpoch()
