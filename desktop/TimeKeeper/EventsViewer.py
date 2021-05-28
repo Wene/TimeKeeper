@@ -8,8 +8,9 @@ from os import path
 class EventsViewer(QWidget):
     update_request = pyqtSignal(int, int)
 
-    def __init__(self, parent=None):
+    def __init__(self, settings: QSettings, parent=None):
         super().__init__(parent)
+        self.settings = settings
 
         layout = QVBoxLayout(self)
 
@@ -48,7 +49,9 @@ class EventsViewer(QWidget):
 
         # Initialize settings
         self.enable(False)
-        self.last_export_path = ''
+        self.settings.beginGroup('EventsViewer')
+        self.last_export_path = self.settings.value('last_path', '')
+        self.settings.endGroup()
 
     @pyqtSlot()
     def update(self):
@@ -65,9 +68,9 @@ class EventsViewer(QWidget):
                                                    'Tab separated files (*.tsv);;All files (*.*)')
         if file_path:
             self.last_export_path, file_name = path.split(file_path)
-            print(self.last_export_path)
-            print(file_name)
-
+            self.settings.beginGroup('EventsViewer')
+            self.settings.setValue('last_path', self.last_export_path)
+            self.settings.endGroup()
 
     @pyqtSlot(list)
     def display_data(self, data: list):

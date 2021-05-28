@@ -20,13 +20,13 @@ class MainForm(QWidget):
 
         layout = QVBoxLayout(self)
 
-        self.events = EventsViewer()
+        self.events = EventsViewer(self.settings)
         self.events.update_request.connect(self.network.get_events)
         self.network.new_data.connect(self.events.display_data)
         self.owner = OwnerEditor()
         self.owner.new_owner.connect(self.debug_print_new_owner)
 
-        self.settings_widget = SettingsEditor(self.settings, self)
+        self.settings_widget = SettingsEditor(self.settings)
         self.settings_widget.host_selected.connect(self.network.stop_asking)
         self.settings_widget.host_selected.connect(self.connect_to_host)
         self.settings_widget.host_removed.connect(self.network.close_connection)
