@@ -68,6 +68,10 @@ class EventsViewer(QWidget):
         if file_path:
             last_export_path, file_name = path.split(file_path)
             self.settings.setValue('last_path', last_export_path)
+
+            with open(file_path, 'w') as f:
+                f.write(self.content.toPlainText())
+
         self.settings.endGroup()
 
     @pyqtSlot(list)
