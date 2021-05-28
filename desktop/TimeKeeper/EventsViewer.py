@@ -2,6 +2,7 @@
 
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
+from os import path
 
 
 class EventsViewer(QWidget):
@@ -45,8 +46,9 @@ class EventsViewer(QWidget):
         self.content.setUndoRedoEnabled(False)
         layout.addWidget(self.content)
 
-        # initial settings
+        # Initialize settings
         self.enable(False)
+        self.last_export_path = ''
 
     @pyqtSlot()
     def update(self):
@@ -58,7 +60,14 @@ class EventsViewer(QWidget):
 
     @pyqtSlot()
     def export(self):
-        pass
+        file_path, _ = QFileDialog.getSaveFileName(self, 'Save file as',
+                                                   self.last_export_path,
+                                                   'Tab separated files (*.tsv);;All files (*.*)')
+        if file_path:
+            self.last_export_path, file_name = path.split(file_path)
+            print(self.last_export_path)
+            print(file_name)
+
 
     @pyqtSlot(list)
     def display_data(self, data: list):
