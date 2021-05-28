@@ -49,9 +49,6 @@ class EventsViewer(QWidget):
 
         # Initialize settings
         self.enable(False)
-        self.settings.beginGroup('EventsViewer')
-        self.last_export_path = self.settings.value('last_path', '')
-        self.settings.endGroup()
 
     @pyqtSlot()
     def update(self):
@@ -63,14 +60,15 @@ class EventsViewer(QWidget):
 
     @pyqtSlot()
     def export(self):
+        self.settings.beginGroup('EventsViewer')
+        last_export_path = self.settings.value('last_path', '')
         file_path, _ = QFileDialog.getSaveFileName(self, 'Save file as',
-                                                   self.last_export_path,
+                                                   last_export_path,
                                                    'Tab separated files (*.tsv);;All files (*.*)')
         if file_path:
-            self.last_export_path, file_name = path.split(file_path)
-            self.settings.beginGroup('EventsViewer')
-            self.settings.setValue('last_path', self.last_export_path)
-            self.settings.endGroup()
+            last_export_path, file_name = path.split(file_path)
+            self.settings.setValue('last_path', last_export_path)
+        self.settings.endGroup()
 
     @pyqtSlot(list)
     def display_data(self, data: list):
