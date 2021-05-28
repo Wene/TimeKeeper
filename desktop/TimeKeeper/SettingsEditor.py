@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import *
 
 class SettingsEditor(QWidget):
     host_selected = pyqtSignal(tuple)
+    host_removed = pyqtSignal()
 
     def __init__(self, settings: QSettings, parent=None):
         super().__init__(parent)
@@ -28,6 +29,8 @@ class SettingsEditor(QWidget):
         data = self.sel_host.currentData(Qt.UserRole)
         if data:
             self.host_selected.emit(data)
+        else:
+            self.host_removed.emit()
 
     @pyqtSlot()
     def load_settings(self):

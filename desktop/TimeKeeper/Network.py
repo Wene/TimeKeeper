@@ -72,6 +72,7 @@ class Network(QObject):
         self.host_socket.connectToHost(address, port)
         self.host_socket.readyRead.connect(self.read)
 
+    @pyqtSlot()
     def close_connection(self):
         self.host_socket.close()
 

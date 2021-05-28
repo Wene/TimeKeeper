@@ -15,23 +15,26 @@ class MainForm(QWidget):
 
         self.network = Network(self)
         self.network.host_found.connect(self.new_host)
+        self.network.connected.connect(self.network_connected)
+        self.network.disconnected.connect(self.network_disconnected)
 
         layout = QVBoxLayout(self)
 
-        events = EventsViewer()
-        events.update_request.connect(self.network.get_events)
-        self.network.new_data.connect(events.display_data)
-        owner = OwnerEditor()
-        owner.new_owner.connect(self.debug_print_new_owner)
+        self.events = EventsViewer()
+        self.events.update_request.connect(self.network.get_events)
+        self.network.new_data.connect(self.events.display_data)
+        self.owner = OwnerEditor()
+        self.owner.new_owner.connect(self.debug_print_new_owner)
 
         self.settings_widget = SettingsEditor(self.settings, self)
         self.settings_widget.host_selected.connect(self.network.stop_asking)
         self.settings_widget.host_selected.connect(self.connect_to_host)
+        self.settings_widget.host_removed.connect(self.network.close_connection)
 
         tabs = QTabWidget()
         layout.addWidget(tabs)
-        tabs.addTab(events, 'Events')
-        tabs.addTab(owner, 'Owner')
+        tabs.addTab(self.events, 'Events')
+        tabs.addTab(self.owner, 'Owner')
         tabs.addTab(self.settings_widget, 'Settings')
 
         self.load_settings()
@@ -59,6 +62,16 @@ class MainForm(QWidget):
         address = data[0]
         port = data[1]
         self.network.connect_to_host(address, port)
+
+    @pyqtSlot()
+    def network_connected(self):
+        self.owner.enable(True)
+        self.events.enable(True)
+
+    @pyqtSlot()
+    def network_disconnected(self):
+        self.owner.enable(False)
+        self.events.enable(False)
 
 
 if __name__ == '__main__':

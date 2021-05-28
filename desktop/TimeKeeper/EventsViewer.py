@@ -45,6 +45,9 @@ class EventsViewer(QWidget):
         self.content.setUndoRedoEnabled(False)
         layout.addWidget(self.content)
 
+        # initial settings
+        self.enable(False)
+
     @pyqtSlot()
     def update(self):
         date_from: QDate = self.sel_date_from.date()
@@ -62,3 +65,10 @@ class EventsViewer(QWidget):
         self.content.clear()
         for line in data:
             self.content.appendPlainText(line)
+
+    @pyqtSlot(bool)
+    def enable(self, en: bool):
+        self.sel_date_from.setEnabled(en)
+        self.sel_date_to.setEnabled(en)
+        self.btn_update.setEnabled(en)
+        self.btn_export.setEnabled(en)

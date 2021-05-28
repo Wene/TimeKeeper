@@ -31,6 +31,8 @@ class OwnerEditor(QWidget):
         self.btn_store.clicked.connect(self.store_owners)
         layout.addWidget(self.btn_store)
 
+        self.enable(False)
+
     @pyqtSlot(list)
     def display_owners_list(self, owners: list):
         self.edt_owner.clear()
@@ -50,3 +52,9 @@ class OwnerEditor(QWidget):
                 hex_str = '0x' + match.group(2).lower()
                 name = match.group(3)
                 self.new_owner.emit(hex_str, name, timestamp)
+
+    @pyqtSlot(bool)
+    def enable(self, en: bool):
+        self.btn_load.setEnabled(en)
+        self.btn_store.setEnabled(en)
+        self.sel_valid.setEnabled(en)
