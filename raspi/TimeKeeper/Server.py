@@ -24,6 +24,7 @@ class NetRequest(QObject):
         self.params.clear()
 
     def answer(self, data: QByteArray):
+        self.socket.write(f'<<< {self.type}\n'.encode())
         self.socket.write(data)
         self.socket.write('<<< done\n'.encode())
         self.deleteLater()

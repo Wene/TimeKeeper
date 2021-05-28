@@ -22,8 +22,10 @@ class MainForm(QWidget):
 
         self.events = EventsViewer(self.settings)
         self.events.update_request.connect(self.network.get_events)
-        self.network.new_data.connect(self.events.display_data)
+        self.network.new_data.connect(self.distinguish_data)
+
         self.owner = OwnerEditor()
+        self.owner.request_owners_list.connect(self.network.get_owner)
         self.owner.new_owner.connect(self.debug_print_new_owner)
 
         self.settings_widget = SettingsEditor(self.settings)
@@ -72,6 +74,14 @@ class MainForm(QWidget):
     def network_disconnected(self):
         self.owner.enable(False)
         self.events.enable(False)
+
+    @pyqtSlot(list)
+    def distinguish_data(self, data: list):
+        type_name = data.pop(0)
+        if '<<< events' == type_name:
+            self.events.display_data(data)
+        elif '<<< owners' == type_name:
+            self.owner.display_owners_list(data)
 
 
 if __name__ == '__main__':

@@ -37,8 +37,7 @@ class OwnerEditor(QWidget):
     def display_owners_list(self, owners: list):
         self.edt_owner.clear()
         for line in owners:
-            text = '\t'.join(line)
-            self.edt_owner.appendPlainText(text)
+            self.edt_owner.appendPlainText(line)
 
     @pyqtSlot()
     def store_owners(self):

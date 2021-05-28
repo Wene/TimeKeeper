@@ -83,6 +83,10 @@ class Network(QObject):
         self.host_socket.write(f'get events between {time_from} and {time_to}'.encode())
 
     @pyqtSlot()
+    def get_owner(self):
+        self.host_socket.write('get owners'.encode())
+
+    @pyqtSlot()
     def read(self):
         size = self.host_socket.bytesAvailable()
         if size > 0:
