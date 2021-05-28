@@ -118,6 +118,20 @@ class DB(QObject):
             table.append((date_str, time_str, name))
         return table
 
+    def get_owners(self):
+        cur = self.conn.cursor()
+        cur.execute('SELECT badge_hex, name FROM ' 
+                    '(SELECT * FROM badge, owner WHERE badge.owner_id = owner.id ORDER BY badge.valid_since DESC) '
+                    'GROUP BY badge_hex;')
+        result = cur.fetchall()
+        cur.close()
+        table = []
+        for record in result:
+            badge = record[0]
+            name = record[1]
+            table.append(f'{badge} {name}')
+        return table
+
     @pyqtSlot(NetRequest)
     def answer_net_request(self, request: NetRequest):
         if request.type == 'events':
@@ -129,5 +143,8 @@ class DB(QObject):
             data = QByteArray(text_block.encode())
             request.answer(data)
         elif request.type == 'owners':
-            result = self.get_owners()  # TODO: implement this
+            result = self.get_owners()
+            text_block = '\n'.join(result) + '\n'
+            data = QByteArray(text_block.encode())
+            request.answer(data)
 
