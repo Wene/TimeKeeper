@@ -80,11 +80,11 @@ class Network(QObject):
     def get_events(self, time_from=0, time_to=None):
         if time_to is None:
             time_to = QDateTime.currentDateTime().toSecsSinceEpoch()
-        self.host_socket.write(f'get events between {time_from} and {time_to}'.encode())
+        self.host_socket.write(f'get events between {time_from} and {time_to}\n'.encode())
 
     @pyqtSlot()
     def get_owner(self):
-        self.host_socket.write('get owners'.encode())
+        self.host_socket.write('get owners\n'.encode())
 
     @pyqtSlot()
     def read(self):

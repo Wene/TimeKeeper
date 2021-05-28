@@ -3,7 +3,6 @@
 import re
 from PyQt5.QtCore import *
 from PyQt5.QtNetwork import *
-from PyQt5.QtNetwork import QTcpSocket
 
 
 class NetRequest(QObject):
@@ -43,7 +42,10 @@ class Connection(QObject):
         self.port = self.socket.peerPort()
         print(f'new connection established to [{self.address.toString()}]:{self.port}')
 
-    def parse_request(self, request: str):
+        self.line_buffer = []
+        self.text_buffer = ''
+
+    def parse_get_request(self, request: str):
         match = re.match(r'get events between (\d+) and (\d+)', request)
         if match:
             from_time = int(match.group(1))
@@ -60,21 +62,37 @@ class Connection(QObject):
 
         return None
 
+    def process_set_request(self, request: str):
+        print(f'Debug info: got set request "{request}"')
+
     @pyqtSlot()
     def read(self):
         size = self.socket.bytesAvailable()
         if size > 0:
             data = self.socket.read(size)
-            text = data.decode()
-            if text.startswith('get'):
-                request = self.parse_request(text)
+            text = self.text_buffer + data.decode()
+            self.text_buffer = ''
+            lines = text.split('\n')
+            self.line_buffer += lines[:-1]
+            if '' != lines[-1]:
+                self.text_buffer = lines[-1]
+            if 0 < len(self.line_buffer):
+                self.process_lines()
+
+    def process_lines(self):
+        while 0 < len(self.line_buffer):
+            line = self.line_buffer.pop(0)
+            if line.startswith('get'):
+                request = self.parse_get_request(line)
                 if request:
                     self.socket.write('<<< processing...\n'.encode())
                     self.new_request.emit(request)
                 else:
                     self.socket.write('<<< request failed\n'.encode())
+            elif line.startswith('set'):
+                self.process_set_request(line)
             else:
-                self.socket.write('<<< unknown request\n'.encode())
+                print(f'unknown request: "{line}"')
 
     @pyqtSlot()
     def cleanup(self):
