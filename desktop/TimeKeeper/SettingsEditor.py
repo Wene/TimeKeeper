@@ -36,11 +36,11 @@ class SettingsEditor(QWidget):
     def load_settings(self):
         self.settings.beginGroup('Settings')
         host = self.settings.value('host', None)
+        self.settings.endGroup()
         if host:
             for i in range(self.sel_host.count()):
                 if self.sel_host.itemText(i) == host:
                     self.sel_host.setCurrentIndex(i)
-        self.settings.endGroup()
 
     @pyqtSlot()
     def store_settings(self):
