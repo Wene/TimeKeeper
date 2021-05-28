@@ -23,7 +23,10 @@ class MainForm(QWidget):
         self.network.new_data.connect(events.display_data)
         owner = OwnerEditor()
         owner.new_owner.connect(self.debug_print_new_owner)
+
         self.settings_widget = SettingsEditor(self.settings, self)
+        self.settings_widget.host_selected.connect(self.network.stop_asking)
+        self.settings_widget.host_selected.connect(self.connect_to_host)
 
         tabs = QTabWidget()
         layout.addWidget(tabs)
@@ -49,7 +52,13 @@ class MainForm(QWidget):
 
     @pyqtSlot(str, QHostAddress, int)
     def new_host(self, name: str, address: QHostAddress, port: int):
-        self.settings_widget.new_host(name)
+        self.settings_widget.new_host(name, (address, port))
+
+    @pyqtSlot(tuple)
+    def connect_to_host(self, data: tuple):
+        address = data[0]
+        port = data[1]
+        self.network.connect_to_host(address, port)
 
 
 if __name__ == '__main__':
