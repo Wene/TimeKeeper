@@ -45,8 +45,8 @@ class OwnerEditor(QWidget):
         lines = full_text.split('\n')
         valid_from: QDateTime = self.sel_valid.dateTime()
         timestamp = valid_from.toSecsSinceEpoch()
-        for l in lines:
-            match = re.match(r'^(0x)?([0-9a-fA-F]+)\s+(.+)', l.rstrip())
+        for entry in lines:
+            match = re.match(r'^(0x)?([0-9a-fA-F]+)\s+(.+)', entry.rstrip())
             if match:
                 hex_str = '0x' + match.group(2).lower()
                 name = match.group(3)

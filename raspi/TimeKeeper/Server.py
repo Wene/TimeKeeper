@@ -22,6 +22,13 @@ class NetRequest(QObject):
         self.type = 'owners'
         self.params.clear()
 
+    def set_owner(self, badge_hex: str, name: str, valid_since: int):
+        self.type = 'set owner'
+        self.params.clear()
+        self.params.append(badge_hex)
+        self.params.append(name)
+        self.params.append(valid_since)
+
     def answer(self, data: QByteArray):
         self.socket.write(f'<<< {self.type}\n'.encode())
         self.socket.write(data)
@@ -63,7 +70,14 @@ class Connection(QObject):
         return None
 
     def process_set_request(self, request: str):
-        print(f'Debug info: got set request "{request}"')
+        match = re.match(r'set owner of (\w+) to "(.+)" valid since (\d+)', request)
+        if match:
+            badge_hex = match.group(1)
+            name = match.group(2)
+            valid_since = int(match.group(3))
+            request = NetRequest(self.socket, self)
+            request.set_owner(badge_hex, name, valid_since)
+            self.new_request.emit(request)
 
     @pyqtSlot()
     def read(self):

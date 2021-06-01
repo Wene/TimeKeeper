@@ -86,6 +86,10 @@ class Network(QObject):
     def get_owner(self):
         self.host_socket.write('get owners\n'.encode())
 
+    @pyqtSlot(str, str, int)
+    def set_owner(self, badge_hex: str, name: str, valid_since: int):
+        self.host_socket.write(f'set owner of {badge_hex} to "{name}" valid since {valid_since}\n'.encode())
+
     @pyqtSlot()
     def read(self):
         size = self.host_socket.bytesAvailable()

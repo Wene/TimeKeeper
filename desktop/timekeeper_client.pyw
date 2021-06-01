@@ -26,7 +26,7 @@ class MainForm(QWidget):
 
         self.owner = OwnerEditor()
         self.owner.request_owners_list.connect(self.network.get_owner)
-        self.owner.new_owner.connect(self.debug_print_new_owner)
+        self.owner.new_owner.connect(self.network.set_owner)
 
         self.settings_widget = SettingsEditor(self.settings)
         self.settings_widget.host_selected.connect(self.network.stop_asking)
@@ -50,10 +50,6 @@ class MainForm(QWidget):
     def closeEvent(self, a0: QCloseEvent) -> None:
         self.settings.setValue('windowSize', self.size())
         self.settings.setValue('windowPosition', self.pos())
-
-    @pyqtSlot(str, str, int)
-    def debug_print_new_owner(self, hex_str: str, name: str, timestamp: int):
-        print(f'{hex_str}\t{name}\t{timestamp}')
 
     @pyqtSlot(str, QHostAddress, int)
     def new_host(self, name: str, address: QHostAddress, port: int):

@@ -155,4 +155,12 @@ class DB(QObject):
             text_block = '\n'.join(result) + '\n'
             data = QByteArray(text_block.encode())
             request.answer(data)
+        elif request.type == 'set owner':
+            badge_hex = request.params[0]
+            name = request.params[1]
+            valid_since = request.params[2]
+            self.add_badge_by_name(badge_hex, name, valid_since)
+            request.deleteLater()
+        else:
+            request.deleteLater()
 
