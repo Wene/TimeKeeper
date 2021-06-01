@@ -75,10 +75,18 @@ class DB(QObject):
         cur = self.conn.cursor()
         if valid_since is None:
             valid_since = QDateTime.currentDateTime().toSecsSinceEpoch()
-        cur.execute('INSERT INTO "badge" ("owner_id", "badge_hex", "valid_since") VALUES (?, ?, ?)',
-                    (owner_id, badge_hex, valid_since))
-        cur.execute('SELECT last_insert_rowid()')
-        result = cur.fetchone()
+
+        # Check for existing, still valid badge
+        cur.execute('SELECT "id" from "badge" '
+                    'WHERE "badge_hex" = ? AND "owner_id" = ? AND "valid_since" <= ? '
+                    'ORDER BY "valid_since" DESC '
+                    'LIMIT 1;', (badge_hex, owner_id, valid_since))
+        result = cur.fetchall()
+
+        # Only add a new owner if not already valid
+        if not result:
+            cur.execute('INSERT INTO "badge" ("owner_id", "badge_hex", "valid_since") VALUES (?, ?, ?)',
+                        (owner_id, badge_hex, valid_since))
         cur.close()
         self.conn.commit()
 
@@ -86,18 +94,19 @@ class DB(QObject):
         owner_id = self.get_owner_id_by_nme(owner)
         self.add_badge_by_owner_id(badge_hex, owner_id, valid_since)
 
-    def get_valid_badge_owner(self, badge: str, time: int = 0):
+    def get_valid_badge_owner(self, badge_hex: str, time: int = 0):
         cur = self.conn.cursor()
         cur.execute('SELECT owner.name FROM owner, badge '
                     'WHERE owner.id = badge.owner_id AND badge.badge_hex = ? AND badge.valid_since <= ? '
-                    'ORDER BY badge.valid_since DESC;', (badge, time))
+                    'ORDER BY badge.valid_since DESC;', (badge_hex, time))
         result = cur.fetchone()
         cur.close()
 
         if result:
-            return result[0]
+            owner_name = result[0]
+            return owner_name
         else:
-            return badge
+            return badge_hex
 
     def get_events_between_timestamps(self, time_from: int, time_to: int):
         cur = self.conn.cursor()
