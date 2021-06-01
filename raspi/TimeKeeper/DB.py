@@ -66,8 +66,9 @@ class DB(QObject):
         cur.execute('INSERT INTO "owner" ("name") VALUES (?)', (name,))
         cur.execute('SELECT last_insert_rowid()')
         result = cur.fetchone()
-        cur.close()
         new_id = result[0]
+        cur.close()
+        self.conn.commit()
         return new_id
 
     def add_badge_by_owner_id(self, badge_hex: str, owner_id: int, valid_since: int = None):
@@ -79,13 +80,11 @@ class DB(QObject):
         cur.execute('SELECT last_insert_rowid()')
         result = cur.fetchone()
         cur.close()
-        new_id = result[0]
-        return new_id
+        self.conn.commit()
 
     def add_badge_by_name(self, badge_hex: str, owner: str, valid_since: int = None):
         owner_id = self.get_owner_id_by_nme(owner)
-        new_id = self.add_badge_by_owner_id(badge_hex, owner_id, valid_since)
-        return new_id
+        self.add_badge_by_owner_id(badge_hex, owner_id, valid_since)
 
     def get_valid_badge_owner(self, badge: str, time: int = 0):
         cur = self.conn.cursor()
