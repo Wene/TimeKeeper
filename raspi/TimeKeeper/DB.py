@@ -55,15 +55,15 @@ class DB(QObject):
         return badge_id
 
     def event_exists(self, timestamp: int, badge_id: int):
-        existing = False
         cur = self.conn.cursor()
         cur.execute('SELECT "id" FROM "event" WHERE "badge_id" =  ? '
                     'AND "event"."time" = ?', (badge_id, timestamp))
         result = cur.fetchone()
-        if result:
-            existing = True
         cur.close()
-        return existing
+        if result:
+            return True
+        else:
+            return False
 
     def log_event(self, timestamp: int, badge_hex: str, source: str):
         source_id = self.get_source_id(source)
@@ -191,13 +191,11 @@ class DB(QObject):
             for element in result:
                 lines.append('\t'.join(element))
             text_block = '\n'.join(lines) + '\n'
-            data = QByteArray(text_block.encode())
-            request.answer(data)
+            request.answer(text_block)
         elif request.type == 'owners':
             result = self.get_owners()
             text_block = '\n'.join(result) + '\n'
-            data = QByteArray(text_block.encode())
-            request.answer(data)
+            request.answer(text_block)
         elif request.type == 'set owner':
             badge_hex = request.params[0]
             name = request.params[1]

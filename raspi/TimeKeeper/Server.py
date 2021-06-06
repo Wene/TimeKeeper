@@ -29,8 +29,9 @@ class NetRequest(QObject):
         self.params.append(name)
         self.params.append(valid_since)
 
-    def answer(self, data: QByteArray):
+    def answer(self, text: str):
         self.socket.write(f'<<< {self.type}\n'.encode())
+        data = QByteArray(text.encode())
         self.socket.write(data)
         self.socket.write('<<< done\n'.encode())
         self.deleteLater()
