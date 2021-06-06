@@ -91,28 +91,36 @@ class DB(QObject):
         return new_id
 
     def add_badge_by_owner_id(self, badge_id: int, owner_id: int, valid_since: int = None):
-        cur = self.conn.cursor()
         if valid_since is None:
             valid_since = QDateTime.currentDateTime().toSecsSinceEpoch()
 
-        # Check for existing, still valid badge
-        cur.execute('SELECT "id" from "badge_owner" '
-                    'WHERE "badge_id" = ? AND "owner_id" = ? AND "valid_since" <= ? '
-                    'ORDER BY "valid_since" DESC '
-                    'LIMIT 1;', (badge_id, owner_id, valid_since))
-        result = cur.fetchall()
+        valid_owner_id = self.get_valid_owner_id(badge_id, valid_since)
 
         # Only add a new owner if not already valid
-        if not result:
+        if valid_owner_id != owner_id:
+            cur = self.conn.cursor()
             cur.execute('INSERT INTO "badge_owner" ("owner_id", "badge_id", "valid_since") VALUES (?, ?, ?)',
                         (owner_id, badge_id, valid_since))
-        cur.close()
-        self.conn.commit()
+            cur.close()
+            self.conn.commit()
 
     def add_badge_by_name(self, badge_hex: str, owner: str, valid_since: int = None):
         owner_id = self.get_owner_id_by_name(owner)
         badge_id = self.get_badge_id(badge_hex)
         self.add_badge_by_owner_id(badge_id, owner_id, valid_since)
+
+    def get_valid_owner_id(self, badge_id: int, valid_since: int):
+        cur = self.conn.cursor()
+        cur.execute('SELECT "owner_id" FROM "badge_owner" '
+                    'WHERE "badge_id" = ? AND "valid_since" = ? '
+                    'ORDER BY "valid_since" DESC LIMIT 1;', (badge_id, valid_since))
+        result = cur.fetchone()
+        cur.close()
+        if result:
+            owner_id = result[0]
+            return owner_id
+        else:
+            return None
 
     def get_valid_badge_owner(self, badge_hex: str, time: int = 0):
         cur = self.conn.cursor()
