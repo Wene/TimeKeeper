@@ -18,7 +18,7 @@ class SettingsEditor(QWidget):
 
         self.sel_host = QComboBox()
         self.sel_host.addItem('(none)', None)
-        self.sel_host.currentIndexChanged.connect(self.store_settings)
+        self.sel_host.textActivated.connect(self.store_settings)
         self.sel_host.currentIndexChanged.connect(self.process_selection)
         layout.addWidget(self.sel_host)
 
