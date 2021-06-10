@@ -22,7 +22,24 @@ class SettingsEditor(QWidget):
         self.sel_host.currentIndexChanged.connect(self.process_selection)
         layout.addWidget(self.sel_host)
 
+        lay_secret = QHBoxLayout()
+        layout.addLayout(lay_secret)
+        self.edt_secret = QLineEdit()
+        self.edt_secret.setEchoMode(QLineEdit.Password)
+        lay_secret.addWidget(self.edt_secret)
+        self.chk_show = QCheckBox('Show')
+        self.chk_show.setChecked(False)
+        self.chk_show.stateChanged.connect(self.show_secret)
+        lay_secret.addWidget(self.chk_show)
+
         layout.addStretch()
+
+    @pyqtSlot()
+    def show_secret(self):
+        if self.chk_show.isChecked():
+            self.edt_secret.setEchoMode(QLineEdit.Normal)
+        else:
+            self.edt_secret.setEchoMode(QLineEdit.Password)
 
     @pyqtSlot()
     def process_selection(self):
