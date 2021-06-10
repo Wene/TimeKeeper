@@ -26,6 +26,7 @@ class SettingsEditor(QWidget):
         layout.addLayout(lay_secret)
         self.edt_secret = QLineEdit()
         self.edt_secret.setEchoMode(QLineEdit.Password)
+        self.edt_secret.editingFinished.connect(self.store_settings)
         lay_secret.addWidget(self.edt_secret)
         self.chk_show = QCheckBox('Show')
         self.chk_show.setChecked(False)
@@ -53,6 +54,7 @@ class SettingsEditor(QWidget):
     def load_settings(self):
         self.settings.beginGroup('Settings')
         host = self.settings.value('host', None)
+        self.edt_secret.setText(self.settings.value('secret', ''))
         self.settings.endGroup()
         if host:
             for i in range(self.sel_host.count()):
@@ -63,6 +65,7 @@ class SettingsEditor(QWidget):
     def store_settings(self):
         self.settings.beginGroup('Settings')
         self.settings.setValue('host', self.sel_host.currentText())
+        self.settings.setValue('secret', self.edt_secret.text())
         self.settings.endGroup()
 
     @pyqtSlot(str, tuple)
