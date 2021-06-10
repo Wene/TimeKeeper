@@ -112,7 +112,7 @@ class DB(QObject):
     def get_valid_owner_id(self, badge_id: int, valid_since: int):
         cur = self.conn.cursor()
         cur.execute('SELECT "owner_id" FROM "badge_owner" '
-                    'WHERE "badge_id" = ? AND "valid_since" = ? '
+                    'WHERE "badge_id" = ? AND "valid_since" <= ? '
                     'ORDER BY "valid_since" DESC LIMIT 1;', (badge_id, valid_since))
         result = cur.fetchone()
         cur.close()
