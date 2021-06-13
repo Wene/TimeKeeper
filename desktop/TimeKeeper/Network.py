@@ -24,6 +24,8 @@ class Network(QObject):
         self.line_cache = []
         self.text_cache = ''
 
+        self.secret = ''
+
     def ask(self, sok: QUdpSocket):
         sok.writeDatagram('I\'m looking for TimeKeeper hosts.'.encode('utf8'),
                           QHostAddress('FF02::1'), 9363)
@@ -68,9 +70,10 @@ class Network(QObject):
                     name = text[len(identifier):]
                     self.host_found.emit(name, sender, port)
 
-    def connect_to_host(self, address: QHostAddress, port: int):
+    def connect_to_host(self, address: QHostAddress, port: int, secret: str):
         self.host_socket.connectToHost(address, port)
         self.host_socket.readyRead.connect(self.read)
+        self.secret = secret
 
     @pyqtSlot()
     def close_connection(self):

@@ -55,11 +55,11 @@ class MainForm(QWidget):
     def new_host(self, name: str, address: QHostAddress, port: int):
         self.settings_widget.new_host(name, (address, port))
 
-    @pyqtSlot(tuple)
-    def connect_to_host(self, data: tuple):
+    @pyqtSlot(tuple, str)
+    def connect_to_host(self, data: tuple, secret: str):
         address = data[0]
         port = data[1]
-        self.network.connect_to_host(address, port)
+        self.network.connect_to_host(address, port, secret)
 
     @pyqtSlot()
     def network_connected(self):

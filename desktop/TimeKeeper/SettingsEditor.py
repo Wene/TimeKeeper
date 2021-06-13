@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import *
 
 
 class SettingsEditor(QWidget):
-    host_selected = pyqtSignal(tuple)
+    host_selected = pyqtSignal(tuple, str)
     host_removed = pyqtSignal()
 
     def __init__(self, settings: QSettings, parent=None):
@@ -48,7 +48,7 @@ class SettingsEditor(QWidget):
     def process_selection(self):
         data = self.sel_host.currentData(Qt.UserRole)
         if data:
-            self.host_selected.emit(data)
+            self.host_selected.emit(data, self.edt_secret.text())
         else:
             self.host_removed.emit()
 
