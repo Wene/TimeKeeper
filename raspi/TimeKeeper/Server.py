@@ -40,7 +40,7 @@ class NetRequest(QObject):
 class Connection(QObject):
     new_request = pyqtSignal(NetRequest)
 
-    def __init__(self, socket: QTcpSocket, parent=None):
+    def __init__(self, socket: QTcpSocket, secret: str, parent=None):
         super().__init__(parent)
         self.socket = socket
         self.socket.readyRead.connect(self.read)
@@ -52,6 +52,7 @@ class Connection(QObject):
 
         self.line_buffer = []
         self.text_buffer = ''
+        self.secret = secret
 
     def parse_get_request(self, request: str):
         match = re.match(r'get events between (\d+) and (\d+)', request)
@@ -122,13 +123,14 @@ class Connection(QObject):
 class Server(QObject):
     new_request = pyqtSignal(NetRequest)
 
-    def __init__(self, name: str, parent=None):
+    def __init__(self, name: str, secret: str, parent=None):
         super().__init__(parent)
         self.mcast_listener = QUdpSocket(self)
         self.mcast_listener.bind(QHostAddress.Any, 9363)
         self.mcast_listener.readyRead.connect(self.incoming)
 
         self.name = name
+        self.secret = secret
 
         self.tcp_server = QTcpServer(self)
         self.tcp_server.listen(QHostAddress.Any, 9363)
@@ -149,7 +151,7 @@ class Server(QObject):
     def connect(self):
         while self.tcp_server.hasPendingConnections():
             socket = self.tcp_server.nextPendingConnection()
-            conn = Connection(socket, self)    # by setting self as parent, this instance will last until self gets deleted
+            conn = Connection(socket, self.secret, self)    # by setting self as parent, this instance will last until self gets deleted
             conn.new_request.connect(self.forward_request)
 
     @pyqtSlot(NetRequest)

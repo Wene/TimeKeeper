@@ -16,9 +16,11 @@ class TimeKeeperService(QObject):
         self.port_name = self.settings.value('port_name', 'FT232R USB UART')
         self.port = self.settings.value('port', '')
         self.source_name = self.settings.value('source', 'main')
+        self.secret = self.settings.value('secret', 'please_change_this')
         self.settings.setValue('port_name', self.port_name)
         self.settings.setValue('port', self.port)
         self.settings.setValue('source', self.source_name)
+        self.settings.setValue('secret', self.secret)
 
         self.serial = SerialInterface(self)
         self.serial.new_line.connect(self.process_line)
@@ -49,7 +51,7 @@ class TimeKeeperService(QObject):
 
         self.db = DB(self, 'timekeeper.db')
 
-        self.server = Server(self.source_name, self)
+        self.server = Server(self.source_name, self.secret, self)
         self.server.new_request.connect(self.db.answer_net_request)
 
     def signal_handler(self, sig_num, stack_frame):
