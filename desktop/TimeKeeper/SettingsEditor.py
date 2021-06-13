@@ -35,6 +35,8 @@ class SettingsEditor(QWidget):
 
         layout.addStretch()
 
+        self.load_settings()
+
     @pyqtSlot()
     def show_secret(self):
         if self.chk_show.isChecked():
@@ -50,7 +52,6 @@ class SettingsEditor(QWidget):
         else:
             self.host_removed.emit()
 
-    @pyqtSlot()
     def load_settings(self):
         self.settings.beginGroup('Settings')
         host = self.settings.value('host', None)
