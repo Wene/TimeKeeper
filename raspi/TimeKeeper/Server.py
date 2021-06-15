@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 
+import hashlib
+import random
 import re
+import string
 from PyQt5.QtCore import *
 from PyQt5.QtNetwork import *
 
@@ -43,7 +46,7 @@ class Connection(QObject):
     def __init__(self, socket: QTcpSocket, secret: str, parent=None):
         super().__init__(parent)
         self.socket = socket
-        self.socket.readyRead.connect(self.read)
+        self.socket.readyRead.connect(self.authenticate)
         self.socket.disconnected.connect(self.cleanup)
 
         self.address = self.socket.peerAddress()
@@ -52,7 +55,25 @@ class Connection(QObject):
 
         self.line_buffer = []
         self.text_buffer = ''
-        self.secret = secret
+
+        self.authenticated = False
+        challenge = ''.join(random.choices(string.digits + string.ascii_letters, k=20))
+        response = secret + challenge
+        self.expected_response = hashlib.sha256(response.encode()).hexdigest()
+        self.socket.write(f'<<< challenge: {challenge}\n'.encode())
+
+    @pyqtSlot()
+    def authenticate(self):
+        size = self.socket.bytesAvailable()
+        if size > 0:
+            data = self.socket.read(size)
+            text = data.decode().rstrip()
+            if text == f'response {self.expected_response}':
+                self.socket.readyRead.disconnect()
+                self.socket.readyRead.connect(self.read)
+            else:
+                self.socket.write('<<< authentication failed\n'.encode())
+                self.socket.close()
 
     def parse_get_request(self, request: str):
         match = re.match(r'get events between (\d+) and (\d+)', request)
