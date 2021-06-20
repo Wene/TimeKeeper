@@ -68,7 +68,7 @@ class Connection(QObject):
         if size > 0:
             data = self.socket.read(size)
             text = data.decode().rstrip()
-            if text == f'response {self.expected_response}':
+            if text == f'response: {self.expected_response}':
                 self.socket.readyRead.disconnect()
                 self.socket.readyRead.connect(self.read)
             else:

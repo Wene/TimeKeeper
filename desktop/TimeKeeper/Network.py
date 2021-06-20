@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import hashlib
+import re
 
 from PyQt5.QtCore import *
 from PyQt5.QtNetwork import *
@@ -101,16 +103,27 @@ class Network(QObject):
             text = self.text_cache + data.decode()
             self.text_cache = ''
             lines = text.split('\n')
+            line: str
             for line in lines:
                 if '<<< processing...' == line:
                     self.line_cache.clear()
                 elif '<<< done' == line:
                     self.new_data.emit(self.line_cache)
                     self.line_cache.clear()
+                elif line.startswith('<<< challenge: '):
+                    self.authenticate(line)
                 elif '' != line:
                     self.line_cache.append(line)
             if '' != lines[-1]:
                 self.text_cache = self.line_cache.pop()
+
+    def authenticate(self, request: str):
+        match = re.match(r'<<< challenge: (\w+)$', request)
+        if match:
+            challenge = match.group(1)
+            response = self.secret + challenge
+            response_hash = hashlib.sha256(response.encode()).hexdigest()
+            self.host_socket.write(f'response: {response_hash}'.encode())
 
     @pyqtSlot()
     def connection_lost(self):
