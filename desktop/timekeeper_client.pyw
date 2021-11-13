@@ -35,9 +35,9 @@ class MainForm(QWidget):
 
         tabs = QTabWidget()
         layout.addWidget(tabs)
-        tabs.addTab(self.events, 'Events')
-        tabs.addTab(self.owner, 'Owner')
-        tabs.addTab(self.settings_widget, 'Settings')
+        tabs.addTab(self.events, self.tr('Events'))
+        tabs.addTab(self.owner, self.tr('Owner'))
+        tabs.addTab(self.settings_widget, self.tr('Settings'))
 
         self.load_settings()
 
@@ -92,6 +92,7 @@ if __name__ == '__main__':
     lib_path = QLibraryInfo.location(QLibraryInfo.TranslationsPath)
     translator.load("qt_de.qm", lib_path)
     translator.load("qtbase_de.qm", lib_path)
+    translator.load('client_de.qm')
     app.installTranslator(translator)
 
     window = MainForm()
