@@ -14,16 +14,30 @@ class SettingsEditor(QWidget):
 
         layout = QVBoxLayout(self)
 
-        layout.addWidget(QLabel(self.tr('Default connection')))
+        self.sel_lang = QComboBox()
+        self.sel_lang.addItem(self.tr('English'), 'en')
+        self.sel_lang.addItem(self.tr('German'), 'de')
+        self.sel_lang.setToolTip(self.tr('Restart application to apply changed language setting.'))
+        self.sel_lang.currentIndexChanged.connect(self.store_settings)
+        lay_lang = QHBoxLayout()
+        lay_lang.addWidget(self.sel_lang)
+        grp_lang = QGroupBox(self.tr('Language'))
+        grp_lang.setLayout(lay_lang)
+        layout.addWidget(grp_lang)
+
+        grp_conn = QGroupBox(self.tr('Default connection'))
+        lay_conn = QVBoxLayout()
+        grp_conn.setLayout(lay_conn)
+        layout.addWidget(grp_conn)
 
         self.sel_host = QComboBox()
         self.sel_host.addItem(self.tr('(none)'), None)
         self.sel_host.textActivated.connect(self.store_settings)
         self.sel_host.currentIndexChanged.connect(self.process_selection)
-        layout.addWidget(self.sel_host)
+        lay_conn.addWidget(self.sel_host)
 
         lay_secret = QHBoxLayout()
-        layout.addLayout(lay_secret)
+        lay_conn.addLayout(lay_secret)
         self.edt_secret = QLineEdit()
         self.edt_secret.setEchoMode(QLineEdit.Password)
         self.edt_secret.editingFinished.connect(self.store_settings)
@@ -54,6 +68,7 @@ class SettingsEditor(QWidget):
 
     def load_settings(self):
         self.settings.beginGroup('Settings')
+        language = self.settings.value('language', 'en')
         host = self.settings.value('host', None)
         self.edt_secret.setText(self.settings.value('secret', ''))
         self.settings.endGroup()
@@ -61,11 +76,17 @@ class SettingsEditor(QWidget):
             for i in range(self.sel_host.count()):
                 if self.sel_host.itemText(i) == host:
                     self.sel_host.setCurrentIndex(i)
+                    break
+        for i in range(self.sel_lang.count()):
+            if self.sel_lang.itemData(i) == language:
+                self.sel_lang.setCurrentIndex(i)
+                break
 
     @pyqtSlot()
     def store_settings(self):
         self.settings.beginGroup('Settings')
         self.settings.setValue('host', self.sel_host.currentText())
+        self.settings.setValue('language', self.sel_lang.currentData(Qt.UserRole))
         self.settings.setValue('secret', self.edt_secret.text())
         self.settings.endGroup()
 

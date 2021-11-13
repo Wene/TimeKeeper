@@ -89,7 +89,9 @@ if __name__ == '__main__':
     app.setApplicationName('TimeKeeper_client')
 
     settings = QSettings()
+    settings.beginGroup('Settings')
     language = settings.value('language', 'en')
+    settings.endGroup()
 
     translator = QTranslator()
     lib_path = QLibraryInfo.location(QLibraryInfo.TranslationsPath)
