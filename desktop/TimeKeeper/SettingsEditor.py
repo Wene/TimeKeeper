@@ -18,7 +18,6 @@ class SettingsEditor(QWidget):
         self.sel_lang.addItem(self.tr('English'), 'en')
         self.sel_lang.addItem(self.tr('German'), 'de')
         self.sel_lang.setToolTip(self.tr('Restart application to apply changed language setting.'))
-        self.sel_lang.currentIndexChanged.connect(self.store_settings)
         lay_lang = QHBoxLayout()
         lay_lang.addWidget(self.sel_lang)
         grp_lang = QGroupBox(self.tr('Language'))
@@ -32,8 +31,6 @@ class SettingsEditor(QWidget):
 
         self.sel_host = QComboBox()
         self.sel_host.addItem(self.tr('(none)'), None)
-        self.sel_host.textActivated.connect(self.store_settings)
-        self.sel_host.currentIndexChanged.connect(self.process_selection)
         lay_conn.addWidget(self.sel_host)
 
         lay_secret = QHBoxLayout()
@@ -50,6 +47,9 @@ class SettingsEditor(QWidget):
         layout.addStretch()
 
         self.load_settings()
+        self.sel_lang.currentIndexChanged.connect(self.store_settings)
+        self.sel_host.textActivated.connect(self.store_settings)
+        self.sel_host.currentIndexChanged.connect(self.process_selection)
 
     @pyqtSlot()
     def show_secret(self):
