@@ -14,10 +14,10 @@ class SettingsEditor(QWidget):
 
         layout = QVBoxLayout(self)
 
-        layout.addWidget(QLabel('Default connection'))
+        layout.addWidget(QLabel(self.tr('Default connection')))
 
         self.sel_host = QComboBox()
-        self.sel_host.addItem('(none)', None)
+        self.sel_host.addItem(self.tr('(none)'), None)
         self.sel_host.textActivated.connect(self.store_settings)
         self.sel_host.currentIndexChanged.connect(self.process_selection)
         layout.addWidget(self.sel_host)
@@ -28,7 +28,7 @@ class SettingsEditor(QWidget):
         self.edt_secret.setEchoMode(QLineEdit.Password)
         self.edt_secret.editingFinished.connect(self.store_settings)
         lay_secret.addWidget(self.edt_secret)
-        self.chk_show = QCheckBox('Show')
+        self.chk_show = QCheckBox(self.tr('Show'))
         self.chk_show.setChecked(False)
         self.chk_show.stateChanged.connect(self.show_secret)
         lay_secret.addWidget(self.chk_show)

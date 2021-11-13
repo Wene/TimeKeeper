@@ -21,23 +21,23 @@ class EventsViewer(QWidget):
         month_start = QDate(today.year(), today.month(), 1)
 
         self.sel_date_from = QDateEdit()
-        self.sel_date_from.setToolTip('Filter date starting with this date')
+        self.sel_date_from.setToolTip(self.tr('Filter date starting with this date'))
         self.sel_date_from.setCalendarPopup(True)
         self.sel_date_from.setDate(month_start)
         lay_filter.addWidget(self.sel_date_from)
 
         self.sel_date_to = QDateEdit()
-        self.sel_date_to.setToolTip('Filter date ending with this date')
+        self.sel_date_to.setToolTip(self.tr('Filter date ending with this date'))
         self.sel_date_to.setCalendarPopup(True)
         self.sel_date_to.setDate(today)
         lay_filter.addWidget(self.sel_date_to)
 
-        self.btn_update = QPushButton('Update')
+        self.btn_update = QPushButton(self.tr('Update'))
         self.btn_update.clicked.connect(self.update)
         lay_filter.addWidget(self.btn_update)
 
         # Export button
-        self.btn_export = QPushButton('Export')
+        self.btn_export = QPushButton(self.tr('Export'))
         self.btn_export.clicked.connect(self.export)
         layout.addWidget(self.btn_export)
 
@@ -62,9 +62,9 @@ class EventsViewer(QWidget):
     def export(self):
         self.settings.beginGroup('EventsViewer')
         last_export_path = self.settings.value('last_path', '')
-        file_path, _ = QFileDialog.getSaveFileName(self, 'Save file as',
+        file_path, _ = QFileDialog.getSaveFileName(self, self.tr('Save file as'),
                                                    last_export_path,
-                                                   'Tab separated files (*.tsv);;All files (*.*)')
+                                                   self.tr('Tab separated files (*.tsv);;All files (*.*)'))
         if file_path:
             last_export_path, file_name = path.split(file_path)
             self.settings.setValue('last_path', last_export_path)

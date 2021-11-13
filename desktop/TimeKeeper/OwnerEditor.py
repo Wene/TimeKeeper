@@ -14,7 +14,7 @@ class OwnerEditor(QWidget):
 
         layout = QVBoxLayout(self)
 
-        self.btn_load = QPushButton('Load all owners')
+        self.btn_load = QPushButton(self.tr('Load all owners'))
         self.btn_load.clicked.connect(self.request_owners_list)
         layout.addWidget(self.btn_load)
 
@@ -22,12 +22,12 @@ class OwnerEditor(QWidget):
         layout.addWidget(self.edt_owner)
 
         self.sel_valid = QDateTimeEdit()
-        self.sel_valid.setToolTip('New owners will be valid from this time onwards.')
+        self.sel_valid.setToolTip(self.tr('New owners will be valid from this time onwards.'))
         self.sel_valid.setDateTime(QDateTime.currentDateTime())
         self.sel_valid.setCalendarPopup(True)
         layout.addWidget(self.sel_valid)
 
-        self.btn_store = QPushButton('Store new owners')
+        self.btn_store = QPushButton(self.tr('Store new owners'))
         self.btn_store.clicked.connect(self.store_owners)
         layout.addWidget(self.btn_store)
 
