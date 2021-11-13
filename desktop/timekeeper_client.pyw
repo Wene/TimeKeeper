@@ -8,9 +8,9 @@ from TimeKeeper import EventsViewer, OwnerEditor, SettingsEditor, Network
 
 
 class MainForm(QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, settings: QSettings, parent=None):
         super().__init__(parent)
-        self.settings = QSettings()
+        self.settings = settings
         self.setWindowTitle('TimeKeeper Client')
 
         self.network = Network(self)
@@ -88,14 +88,17 @@ if __name__ == '__main__':
     app.setOrganizationName('Wene')
     app.setApplicationName('TimeKeeper_client')
 
+    settings = QSettings()
+    language = settings.value('language', 'en')
+
     translator = QTranslator()
     lib_path = QLibraryInfo.location(QLibraryInfo.TranslationsPath)
-    translator.load("qt_de.qm", lib_path)
-    translator.load("qtbase_de.qm", lib_path)
-    translator.load('client_de.qm')
+    translator.load(f'qt_{language}.qm', lib_path)
+    translator.load(f'qtbase_{language}.qm', lib_path)
+    translator.load(f'client_{language}.qm')
     app.installTranslator(translator)
 
-    window = MainForm()
+    window = MainForm(settings)
     window.show()
 
     app.exec()
