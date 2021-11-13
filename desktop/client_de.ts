@@ -73,19 +73,39 @@
 <context>
     <name>SettingsEditor</name>
     <message>
-        <location filename="TimeKeeper/SettingsEditor.py" line="17"/>
+        <location filename="TimeKeeper/SettingsEditor.py" line="28"/>
         <source>Default connection</source>
         <translation>Standard Verbindung</translation>
     </message>
     <message>
-        <location filename="TimeKeeper/SettingsEditor.py" line="20"/>
+        <location filename="TimeKeeper/SettingsEditor.py" line="34"/>
         <source>(none)</source>
         <translation>(keine)</translation>
     </message>
     <message>
-        <location filename="TimeKeeper/SettingsEditor.py" line="31"/>
+        <location filename="TimeKeeper/SettingsEditor.py" line="45"/>
         <source>Show</source>
         <translation>Anzeigen</translation>
+    </message>
+    <message>
+        <location filename="TimeKeeper/SettingsEditor.py" line="18"/>
+        <source>English</source>
+        <translation>Englisch</translation>
+    </message>
+    <message>
+        <location filename="TimeKeeper/SettingsEditor.py" line="19"/>
+        <source>German</source>
+        <translation>Deutsch</translation>
+    </message>
+    <message>
+        <location filename="TimeKeeper/SettingsEditor.py" line="20"/>
+        <source>Restart application to apply changed language setting.</source>
+        <translation>Applikation neu starten um die geänderte Sprache anzuwenden.</translation>
+    </message>
+    <message>
+        <location filename="TimeKeeper/SettingsEditor.py" line="24"/>
+        <source>Language</source>
+        <translation>Sprache</translation>
     </message>
 </context>
 </TS>
