@@ -85,7 +85,10 @@ class SettingsEditor(QWidget):
     @pyqtSlot()
     def store_settings(self):
         self.settings.beginGroup('Settings')
-        self.settings.setValue('host', self.sel_host.currentText())
+        if self.sel_host.currentData(Qt.UserRole):
+            self.settings.setValue('host', self.sel_host.currentText())
+        else:
+            self.settings.remove('host')
         self.settings.setValue('language', self.sel_lang.currentData(Qt.UserRole))
         self.settings.setValue('secret', self.edt_secret.text())
         self.settings.endGroup()
