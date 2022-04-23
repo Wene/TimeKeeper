@@ -13,3 +13,53 @@ Execute `raspi-config` and navigate to `3 interface options > Serial`. Here enab
 ### Test the connection
 Use the command `screen /dev/ttyS0 115200` to open a screen session on the embedded UART serial interface at 115200 baud. Make sure something like an FTDI USB adapter is connected to that interface and configured to use the same data rate. You can now type in the screen session and your input should appear on the other side and vice versa.
 
+
+
+
+```
+
+                  ┌───────────────────────────────────────────────────┐
+                  │                                                   │
+┌─────────────────┴────────┐                                          │
+│                          │                                          │
+│                3v3   5v0 │                                          │
+│                          │                                          │
+│                      5v0 │                                          │
+│   Raspberry Pi           │                                          │
+│                      GND ├──────────────────────────────────────────┼──┐
+│                          │                                          │  │
+│                      TXD ├─────────┐        ┌──────────────────┐    │  │
+│                          │         │        │                  │    │  │
+│                      RXD ├─────────┼──┐     │ Arduino          │    │  │
+│                          │         │  │     │ Pro Mini         │    │  │
+│                          │         │  │     │ 328P 3v3 8 MHz   │    │  │
+└──────────────────────────┘         │  │     │                  │    │  │
+                                     │  └─────┤ TX               │    │  │
+                                     │        │                  │    │  │
+                                     └────────┤ RX           GND ├────┼──┤
+                                              │                  │    │  │
+                                              │                  │    │  │
+                                              │                  │    │  │
+                                              │              VCC ├────┤  │
+                                              │                  │    │  │
+                                              │                  │    │  │                      ┌───────────────────────┐
+                                        ┌─────┼─── A5 (SCL)      │    │  │                      │                       │
+┌─────────────────────────────┐         │     │               10 ├────┼──┼──────────────────────┤ SDA                   │
+│                             │         │  ┌──┼─── A4 (SDA)      │    │  │                      │                       │
+│                         GND ├──────┐  │  │  │               11 ├────┼──┼───────────────┐  ┌───┤ SCK                   │
+│                             │      │  │  │  │                  │    │  │               │  │   │                       │
+│                         VCC ├───┐  │  │  │  │               12 ├────┼──┼────────────┐  └──┼───┤ MOSI                  │
+│ Display (3V3 tolerant)      │   │  │  │  │  │                  │    │  │            │     │   │                       │
+│                         SDA ├───┼──┼──┼──┘  │               13 ├────┼──┼─────────┐  └─────┼───┤ MISO                  │
+│                             │   │  │  │     │                  │    │  │         │        │   │           RFID-RC522  │
+│                         SCL ├───┼──┼──┘     │               A0 ├────┼──┼──────┐  └────────┘   │ IRQ                   │
+│                             │   │  │        │                  │    │  │      │               │                       │
+└─────────────────────────────┘   │  │        └──────────────────┘    │  ├──────┼───────────────┤ GND                   │
+                                  │  │                                │  │      │               │                       │
+                                  │  └────────────────────────────────┼──┘      └───────────────┤ RST                   │
+                                  │                                   │                         │                       │
+                                  └───────────────────────────────────┴─────────────────────────┤ 3v3                   │
+                                                                                                │                       │
+                                                                                                └───────────────────────┘
+
+```
