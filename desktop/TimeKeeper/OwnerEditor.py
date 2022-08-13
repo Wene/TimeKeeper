@@ -55,7 +55,7 @@ class OwnerEditor(QWidget):
         filter_text = self.edt_filter.text()
         for line in owners:
             if filter_text:
-                if filter_text in line:
+                if filter_text.casefold() in line.casefold():
                     self.edt_owner.appendPlainText(line)
             else:
                 self.edt_owner.appendPlainText(line)
