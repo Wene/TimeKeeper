@@ -14,7 +14,16 @@ class OwnerEditor(QWidget):
 
         layout = QVBoxLayout(self)
 
-        self.btn_load = QPushButton(self.tr('Load all owners'))
+        self.edt_filter = QLineEdit()
+        self.edt_filter.setToolTip(self.tr('<p>If a filter is entered, only lines containing the filter text get '
+                                           'loaded. If the filter is empty, everything gets loaded.</p>'))
+        self.edt_filter.setPlaceholderText('Filter')
+        self.edt_filter.textEdited.connect(self.update_filter)
+        layout.addWidget(self.edt_filter)
+
+        self.load_all_text = self.tr('Load all owners')
+        self.load_filtered_text = self.tr('Load filtered owners')
+        self.btn_load = QPushButton(self.load_all_text)
         self.btn_load.clicked.connect(self.request_owners_list)
         layout.addWidget(self.btn_load)
 
@@ -33,11 +42,23 @@ class OwnerEditor(QWidget):
 
         self.enable(False)
 
+    @pyqtSlot()
+    def update_filter(self):
+        if self.edt_filter.text():
+            self.btn_load.setText(self.load_filtered_text)
+        else:
+            self.btn_load.setText(self.load_all_text)
+
     @pyqtSlot(list)
     def display_owners_list(self, owners: list):
         self.edt_owner.clear()
+        filter_text = self.edt_filter.text()
         for line in owners:
-            self.edt_owner.appendPlainText(line)
+            if filter_text:
+                if filter_text in line:
+                    self.edt_owner.appendPlainText(line)
+            else:
+                self.edt_owner.appendPlainText(line)
 
     @pyqtSlot()
     def store_owners(self):
