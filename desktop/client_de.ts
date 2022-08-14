@@ -55,35 +55,45 @@
 <context>
     <name>OwnerEditor</name>
     <message>
-        <location filename="TimeKeeper/OwnerEditor.py" line="17"/>
+        <location filename="TimeKeeper/OwnerEditor.py" line="24"/>
         <source>Load all owners</source>
         <translation>Alle Kartenbesitzer laden</translation>
     </message>
     <message>
-        <location filename="TimeKeeper/OwnerEditor.py" line="25"/>
+        <location filename="TimeKeeper/OwnerEditor.py" line="34"/>
         <source>New owners will be valid from this time onwards.</source>
         <translation>Neue Kartenbesitzer werden ab diesem Zeitpunkt gültig sein.</translation>
     </message>
     <message>
-        <location filename="TimeKeeper/OwnerEditor.py" line="30"/>
+        <location filename="TimeKeeper/OwnerEditor.py" line="39"/>
         <source>Store new owners</source>
         <translation>Neue Kartenbesitzer speichern</translation>
+    </message>
+    <message>
+        <location filename="TimeKeeper/OwnerEditor.py" line="18"/>
+        <source>&lt;p&gt;If a filter is entered, only lines containing the filter text get loaded. If the filter is empty, everything gets loaded.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Wenn ein Filter eingegeben wird, werden nur Zeilen geladen die den Filtertext enthalten. Wenn der Filter leer ist wird alles geladen.&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <location filename="TimeKeeper/OwnerEditor.py" line="25"/>
+        <source>Load filtered owners</source>
+        <translation>Gefilterte Kartenbesitzer laden</translation>
     </message>
 </context>
 <context>
     <name>SettingsEditor</name>
     <message>
-        <location filename="TimeKeeper/SettingsEditor.py" line="28"/>
+        <location filename="TimeKeeper/SettingsEditor.py" line="27"/>
         <source>Default connection</source>
         <translation>Standard Verbindung</translation>
     </message>
     <message>
-        <location filename="TimeKeeper/SettingsEditor.py" line="34"/>
+        <location filename="TimeKeeper/SettingsEditor.py" line="33"/>
         <source>(none)</source>
         <translation>(keine)</translation>
     </message>
     <message>
-        <location filename="TimeKeeper/SettingsEditor.py" line="45"/>
+        <location filename="TimeKeeper/SettingsEditor.py" line="42"/>
         <source>Show</source>
         <translation>Anzeigen</translation>
     </message>
@@ -103,7 +113,7 @@
         <translation>Applikation neu starten um die geänderte Sprache anzuwenden.</translation>
     </message>
     <message>
-        <location filename="TimeKeeper/SettingsEditor.py" line="24"/>
+        <location filename="TimeKeeper/SettingsEditor.py" line="23"/>
         <source>Language</source>
         <translation>Sprache</translation>
     </message>
