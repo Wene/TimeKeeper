@@ -1,0 +1,3 @@
+pylupdate5 timekeeper_client.pyw TimeKeeper/*.py -ts client_de.ts
+Qt 5 Linguist
+lrelease client_de.ts -qm client_de.qm
