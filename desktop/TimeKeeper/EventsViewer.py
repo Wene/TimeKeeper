@@ -14,6 +14,13 @@ class EventsViewer(QWidget):
 
         layout = QVBoxLayout(self)
 
+        self.edt_text_filter = QLineEdit()
+        self.edt_text_filter.setPlaceholderText(self.tr('Filter'))
+        self.edt_text_filter.setToolTip(self.tr('<p>If a filter is entered, only lines containing the filter text get '
+                                                'loaded. If the filter is empty, everything gets loaded.</p>'))
+        self.edt_text_filter.textEdited.connect(self.text_filter_edited)
+        layout.addWidget(self.edt_text_filter)
+
         # Filter section
         lay_filter = QHBoxLayout()
         layout.addLayout(lay_filter)
@@ -32,7 +39,9 @@ class EventsViewer(QWidget):
         self.sel_date_to.setDate(today)
         lay_filter.addWidget(self.sel_date_to)
 
-        self.btn_update = QPushButton(self.tr('Update'))
+        self.update_unfiltered_text = self.tr('Update unfiltered')
+        self.update_filtered_text = self.tr('Update filtered')
+        self.btn_update = QPushButton(self.update_unfiltered_text)
         self.btn_update.clicked.connect(self.update)
         lay_filter.addWidget(self.btn_update)
 
@@ -49,6 +58,14 @@ class EventsViewer(QWidget):
 
         # Initialize settings
         self.enable(False)
+
+    @pyqtSlot()
+    def text_filter_edited(self):
+        filter_text = self.edt_text_filter.text()
+        if filter_text:
+            self.btn_update.setText(self.update_filtered_text)
+        else:
+            self.btn_update.setText(self.update_unfiltered_text)
 
     @pyqtSlot()
     def update(self):
