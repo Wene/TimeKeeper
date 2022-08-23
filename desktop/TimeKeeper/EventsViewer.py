@@ -94,8 +94,13 @@ class EventsViewer(QWidget):
     @pyqtSlot(list)
     def display_data(self, data: list):
         self.content.clear()
+        filter_text = self.edt_text_filter.text()
         for line in data:
-            self.content.appendPlainText(line)
+            if filter_text:
+                if filter_text.casefold() in line.casefold():
+                    self.content.appendPlainText(line)
+            else:
+                self.content.appendPlainText(line)
 
     @pyqtSlot(bool)
     def enable(self, en: bool):
