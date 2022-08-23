@@ -4,34 +4,54 @@
 <context>
     <name>EventsViewer</name>
     <message>
-        <location filename="TimeKeeper/EventsViewer.py" line="24"/>
+        <location filename="TimeKeeper/EventsViewer.py" line="31"/>
         <source>Filter date starting with this date</source>
         <translation>Anfangsdatum für den Filter</translation>
     </message>
     <message>
-        <location filename="TimeKeeper/EventsViewer.py" line="30"/>
+        <location filename="TimeKeeper/EventsViewer.py" line="37"/>
         <source>Filter date ending with this date</source>
         <translation>Enddatum für den Filter</translation>
     </message>
     <message>
         <location filename="TimeKeeper/EventsViewer.py" line="35"/>
         <source>Update</source>
-        <translation>Aktualisieren</translation>
+        <translation type="obsolete">Aktualisieren</translation>
     </message>
     <message>
-        <location filename="TimeKeeper/EventsViewer.py" line="40"/>
+        <location filename="TimeKeeper/EventsViewer.py" line="49"/>
         <source>Export</source>
         <translation>Exportieren</translation>
     </message>
     <message>
-        <location filename="TimeKeeper/EventsViewer.py" line="65"/>
+        <location filename="TimeKeeper/EventsViewer.py" line="82"/>
         <source>Save file as</source>
         <translation>Datei speichern unter</translation>
     </message>
     <message>
-        <location filename="TimeKeeper/EventsViewer.py" line="65"/>
+        <location filename="TimeKeeper/EventsViewer.py" line="82"/>
         <source>Tab separated files (*.tsv);;All files (*.*)</source>
         <translation>Tabulator getrennte Dateien (*.tsv);;Alle Dateien (*.*)</translation>
+    </message>
+    <message>
+        <location filename="TimeKeeper/EventsViewer.py" line="18"/>
+        <source>Filter</source>
+        <translation>Filter</translation>
+    </message>
+    <message>
+        <location filename="TimeKeeper/EventsViewer.py" line="19"/>
+        <source>&lt;p&gt;If a filter is entered, only lines containing the filter text get loaded. If the filter is empty, everything gets loaded.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Wenn ein Filter eingegeben wird, werden nur Zeilen geladen die den Filtertext enthalten. Wenn der Filter leer ist wird alles geladen.&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <location filename="TimeKeeper/EventsViewer.py" line="42"/>
+        <source>Update unfiltered</source>
+        <translation>Alles aktualisieren</translation>
+    </message>
+    <message>
+        <location filename="TimeKeeper/EventsViewer.py" line="43"/>
+        <source>Update filtered</source>
+        <translation>Gefiltert aktualisieren</translation>
     </message>
 </context>
 <context>
